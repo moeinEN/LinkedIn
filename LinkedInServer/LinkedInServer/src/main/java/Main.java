@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.*;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -14,6 +16,46 @@ public class Main {
     public static void main(String[] args) throws Exception {
         // Create HTTP server listening on port 8080
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+
+        Connection db = null;
+        Statement stmt = null;
+
+        try {
+            Class.forName("org.sqlite.JDBC");
+            db = DriverManager.getConnection("jdbc:sqlite:src/main/resources/BackEndDb.db");
+            db.setAutoCommit(false);
+            System.out.println("Opened database successfully");
+            stmt = db.createStatement();
+
+            String sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
+                    "VALUES (1, 'Paul', 32, 'California', 20000.00 );";
+            stmt.executeUpdate(sql);
+
+            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
+                    "VALUES (2, 'Allen', 25, 'Texas', 15000.00 );";
+            stmt.executeUpdate(sql);
+
+            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
+                    "VALUES (3, 'Teddy', 23, 'Norway', 20000.00 );";
+            stmt.executeUpdate(sql);
+
+            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
+                    "VALUES (4, 'Mark', 25, 'Rich-Mond ', 65000.00 );";
+            stmt.executeUpdate(sql);
+
+            stmt.close();
+            db.commit();
+
+        } catch ( Exception e ) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+//            System.exit(0);
+        }
+        finally {
+            db.close();
+        }
+        System.out.println("Records created successfully");
+
+
 
         // Handle POST requests at /hello
         server.createContext("/hello", new HttpHandler() {

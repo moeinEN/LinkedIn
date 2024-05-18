@@ -18,6 +18,8 @@ public class User {
     private String username;
     @SerializedName("password")
     private String password;
+    @SerializedName("email")
+    private String email;
 
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
