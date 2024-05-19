@@ -15,8 +15,8 @@ public interface UserService {
     @GET("/users")
     public Call<List<User>> getUsers();
 
-    @GET("/user/register/")
-    public Call<JsonObject> regUser(String password, String username);
+    @POST("/user/register")
+    public Call<String> signUp(@Body User user);
 
     @GET("/users/{username}")
     public Call<User> getUser(@Path("username") String username);

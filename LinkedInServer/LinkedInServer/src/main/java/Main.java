@@ -1,10 +1,14 @@
+import Controllers.DbController;
 import Model.User;
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.*;
 
 import java.io.IOException;
@@ -20,13 +24,14 @@ public class Main {
         Connection db = null;
         Statement stmt = null;
 
-        try {
-            Class.forName("org.sqlite.JDBC");
-            db = DriverManager.getConnection("jdbc:sqlite:src/main/resources/BackEndDb.db");
-            db.setAutoCommit(false);
-            System.out.println("Opened database successfully");
-            stmt = db.createStatement();
+        db = DbController.getConnection();
+        db.setAutoCommit(false);
+        System.out.println("Opened database successfully");
 
+        stmt = db.createStatement();
+
+
+        try {
             String sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
                     "VALUES (1, 'Paul', 32, 'California', 20000.00 );";
             stmt.executeUpdate(sql);
@@ -93,13 +98,53 @@ public class Main {
                     System.out.println("got it");
                     User user;
                     try {
-                        user = new User(1L, "test", "passTEST");
+                        user = new User();
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
 
                     byte[] responseBytes = user.toByte("UTF-8");
                     exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, responseBytes.length); // use the actual length of the response body
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(responseBytes);
+                    }
+                } else {
+                    String response = "Method Not Allowed";
+                    exchange.sendResponseHeaders(405, response.getBytes().length); // 405 Method Not Allowed
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
+                }
+            }
+        });
+
+        server.createContext("/user/register", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if ("POST".equals(exchange.getRequestMethod())) {
+                    //TODO better to add a logger for debugging purposes (GondeGoozi Nashta)
+                    System.out.println("got it");
+
+                    User user = null;
+                    try (InputStream requestBody = exchange.getRequestBody();
+                         InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                        Gson gson = new Gson();
+                        user = gson.fromJson(reader, User.class);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        exchange.sendResponseHeaders(400, -1); // 400 Bad Request
+                        return;
+                    }
+
+                    System.out.println("Received user: " + user);
+//                        System.out.println(user.getEmail() + "\n" + user.getPassword() + "\n" + user.getUsername() + "\n" + user.getName() + "\n" + user.getFamilyName());
+
+                    String successMessage = "User registered successfully";
+                    byte[] responseBytes = successMessage.getBytes("UTF-8");
+
+                    exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
                     exchange.sendResponseHeaders(200, responseBytes.length); // use the actual length of the response body
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(responseBytes);

@@ -1,4 +1,6 @@
 import Controller.RetrofitBuilder;
+import Controller.SignUpController;
+import Model.User;
 
 public class Main {
     public static void main(String[] args) {
@@ -6,5 +8,7 @@ public class Main {
 
         System.out.println(retrofitBuilder.syncCallSayHello().toString());
         System.out.println(retrofitBuilder.syncCallGetUser().toString());
+
+        System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.checkUser("mmd@yahoo.com", "tEST@123", "tEST@123", "Mmd", "Goostavo")));
     }
 }

@@ -69,15 +69,31 @@ public class RetrofitBuilder {
             return null; }
     }
 
-    public JsonObject syncCallRegister(String username, String password){
+//    public JsonObject syncCallRegister(String username, String password){
+//        Retrofit retrofit = this.retrofitBuilder();
+//        UserService service = retrofit.create(UserService.class);
+//        Call<JsonObject> callSync = service.regUser(username, password);
+//
+//        try {
+//            Response<JsonObject> response = callSync.execute();
+//            JsonObject string = response.body();
+//            return string;
+//        } catch (Exception ex) {
+//            ex.printStackTrace();
+//            return null; }
+//    }
+
+    public String syncCallSignUp(User user){
         Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
-        Call<JsonObject> callSync = service.regUser(username, password);
+        Call<String> callSync = service.signUp(user);
 
         try {
-            Response<JsonObject> response = callSync.execute();
-            JsonObject string = response.body();
-            return string;
+//            GsonBuilder JsonReader = new GsonBuilder();
+//            JsonReader.setLenient();
+            Response<String> response = callSync.execute();
+            String responseString = response.body();
+            return responseString;
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }
