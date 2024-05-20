@@ -1,9 +1,15 @@
-package Controllers;
+package Database;
 
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class DbController {
+
+    private static Logger logger = Logger.getLogger(DbController.class.getName());
+
+
     public static Connection getConnection() {
         Connection db = null;
         try {
@@ -27,10 +33,9 @@ public class DbController {
         try {
             stmt = db.createStatement();
         } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            e.printStackTrace();
         }
-        System.out.println("Statement created");
-
+        logger.log(Level.INFO, "Statement created");
         return stmt;
     }
 
