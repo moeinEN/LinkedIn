@@ -33,7 +33,7 @@ public class Main {
 
         try {
             String sql = "CREATE TABLE USER (\n" +
-                    "    id BIGINT PRIMARY KEY,\n" +
+                    "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                     "    name VARCHAR(255),\n" +
                     "    familyName VARCHAR(255),\n" +
                     "    username VARCHAR(255) UNIQUE,\n" +
@@ -149,7 +149,7 @@ public class Main {
                         String sql = "INSERT INTO USER (id, name, familyName, username, password, email) " + "VALUES (?, ?, ?, ?, ?, ?);";
 
                         PreparedStatement pstmt = db.prepareStatement(sql);
-                        pstmt.setLong(1, user.getId());
+//                        pstmt.setLong(1, user.getId());
                         pstmt.setString(2, user.getName());
                         pstmt.setString(3, user.getFamilyName());
                         pstmt.setString(4, user.getUsername());

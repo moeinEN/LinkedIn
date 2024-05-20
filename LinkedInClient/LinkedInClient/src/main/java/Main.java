@@ -10,5 +10,7 @@ public class Main {
         System.out.println(retrofitBuilder.syncCallGetUser().toString());
 
         System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.checkUser("mmd@yahoo.com", "tEST@123", "tEST@123", "Mmd", "Goostavo")));
+        System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.checkUser("kosanat@yahoo.com", "teteEST@123", "teteEST@123", "KosMadar", "Kosmadar")));
+
     }
 }
