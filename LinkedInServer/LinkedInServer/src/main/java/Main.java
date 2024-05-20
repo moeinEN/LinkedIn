@@ -32,20 +32,15 @@ public class Main {
 
 
         try {
-            String sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-                    "VALUES (1, 'Paul', 32, 'California', 20000.00 );";
-            stmt.executeUpdate(sql);
+            String sql = "CREATE TABLE USER (\n" +
+                    "    id BIGINT PRIMARY KEY,\n" +
+                    "    name VARCHAR(255),\n" +
+                    "    familyName VARCHAR(255),\n" +
+                    "    username VARCHAR(255) UNIQUE,\n" +
+                    "    password VARCHAR(255),\n" +
+                    "    email VARCHAR(255) UNIQUE\n" +
+                    ");";
 
-            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-                    "VALUES (2, 'Allen', 25, 'Texas', 15000.00 );";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-                    "VALUES (3, 'Teddy', 23, 'Norway', 20000.00 );";
-            stmt.executeUpdate(sql);
-
-            sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-                    "VALUES (4, 'Mark', 25, 'Rich-Mond ', 65000.00 );";
             stmt.executeUpdate(sql);
 
             stmt.close();
@@ -58,7 +53,7 @@ public class Main {
         finally {
             db.close();
         }
-        System.out.println("Records created successfully");
+        System.out.println("Table created successfully");
 
 
 
@@ -139,7 +134,42 @@ public class Main {
                     }
 
                     System.out.println("Received user: " + user);
-//                        System.out.println(user.getEmail() + "\n" + user.getPassword() + "\n" + user.getUsername() + "\n" + user.getName() + "\n" + user.getFamilyName());
+
+                    Connection db = null;
+
+                    db = DbController.getConnection();
+                    try {
+                        db.setAutoCommit(false);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    System.out.println("Opened database successfully");
+
+                    try {
+                        String sql = "INSERT INTO USER (id, name, familyName, username, password, email) " + "VALUES (?, ?, ?, ?, ?, ?);";
+
+                        PreparedStatement pstmt = db.prepareStatement(sql);
+                        pstmt.setLong(1, user.getId());
+                        pstmt.setString(2, user.getName());
+                        pstmt.setString(3, user.getFamilyName());
+                        pstmt.setString(4, user.getUsername());
+                        pstmt.setString(5, user.getPassword());
+                        pstmt.setString(6, user.getEmail());
+
+                        pstmt.executeUpdate();
+                        db.commit();
+
+                    } catch ( Exception e ) {
+                        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+                    }
+                    finally {
+                        try {
+                            db.close();
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
 
                     String successMessage = "User registered successfully";
                     byte[] responseBytes = successMessage.getBytes("UTF-8");
