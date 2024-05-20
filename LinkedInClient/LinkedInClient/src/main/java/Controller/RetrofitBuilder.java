@@ -6,7 +6,9 @@ import Service.UserService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -86,14 +88,11 @@ public class RetrofitBuilder {
     public String syncCallSignUp(User user){
         Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
-        Call<String> callSync = service.signUp(user);
+        Call<ResponseBody> callSync = service.signUp(user);
 
         try {
-//            GsonBuilder JsonReader = new GsonBuilder();
-//            JsonReader.setLenient();
-            Response<String> response = callSync.execute();
-            String responseString = response.body();
-            return responseString;
+            Response<ResponseBody> response = callSync.execute();
+            return response.body().string();
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }

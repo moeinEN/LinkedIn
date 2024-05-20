@@ -2,7 +2,9 @@ package Service;
 
 import Model.User;
 import com.google.gson.JsonObject;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.*;
 
 import java.util.List;
@@ -16,7 +18,7 @@ public interface UserService {
     public Call<List<User>> getUsers();
 
     @POST("/user/register")
-    public Call<String> signUp(@Body User user);
+    public Call<ResponseBody> signUp(@Body User user);
 
     @GET("/users/{username}")
     public Call<User> getUser(@Path("username") String username);
