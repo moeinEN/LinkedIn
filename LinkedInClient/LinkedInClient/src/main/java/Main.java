@@ -1,6 +1,6 @@
 import Controller.RetrofitBuilder;
 import Controller.SignUpController;
-import Model.User;
+import Model.SignUpMessages;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,8 +9,19 @@ public class Main {
         System.out.println(retrofitBuilder.syncCallSayHello().toString());
         System.out.println(retrofitBuilder.syncCallGetUser().toString());
 
-        System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.checkUser("mmd@yahoo.com", "tEST@123", "tEST@123", "Mmd", "Goostavo")));
-        System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.checkUser("kosanat@yahoo.com", "teteEST@123", "teteEST@123", "KosMadar", "Kosmadar")));
+        SignUpMessages signUpMessages = null;
+        if((signUpMessages = SignUpController.validateUserData("mmd23@yahoo.com", "tEST@123", "tEST@123", "Goostavo")) == SignUpMessages.SUCCESS) {
+            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("mmd23@yahoo.com", "tEST@123", "tEST@123", "Goostavo")));
+        }
+        else {
+            System.out.println(signUpMessages.message);
+        }
 
+        if((signUpMessages = SignUpController.validateUserData("kosanat3221@yahoo.com", "teteEST@123", "teteEST@123", "Kosmadar")) == SignUpMessages.SUCCESS) {
+            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("kosanat3221@yahoo.com", "teteEST@123", "teteEST@123", "Kosmadar")));
+        }
+        else {
+            System.out.println(signUpMessages.message);
+        }
     }
 }

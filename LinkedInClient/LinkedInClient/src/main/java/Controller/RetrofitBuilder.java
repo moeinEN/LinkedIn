@@ -14,6 +14,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import java.io.IOException;
+
 public class RetrofitBuilder {
 
     private static final String BASE_URL = "http://localhost:8080";
@@ -21,6 +23,7 @@ public class RetrofitBuilder {
 
     private Retrofit retrofitBuilder(){
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
         Gson gson = new GsonBuilder()
                 .create();
         Retrofit retrofit = new Retrofit.Builder()
@@ -95,6 +98,22 @@ public class RetrofitBuilder {
             return response.body().string();
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null; }
+            return null;
+        }
+    }
+
+    public String syncCallLogin() {
+        Retrofit retrofit = this.retrofitBuilder();
+        UserService service = retrofit.create(UserService.class);
+        Call<Void> callLogin = service.login();
+
+        try {
+            Response<Void> response = callLogin.execute();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return "";
     }
 }

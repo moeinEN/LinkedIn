@@ -1,4 +1,4 @@
-package Controller;
+package Controllers;
 
 import Model.SignUpMessages;
 import Model.User;
@@ -60,10 +60,10 @@ public class SignUpController {
 
 
     public static User newUser(String email, String password, String confirmationPassword, String username) {
-            User user = new User();
-            user.setEmail(email);
-            user.setPassword(password);
-            user.setUsername(username);
-            return user;
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setUsername(username);
+        return user;
     }
 }
