@@ -2,7 +2,7 @@ package Controllers;
 
 import Database.DatabaseQueryController;
 import Database.DbController;
-import Model.SignUpMessages;
+import Model.Messages;
 import Model.User;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
@@ -83,16 +83,12 @@ public class RequestHandler {
             }
             System.out.println("Received user: " + recievedUser);
 
-            String result = "";
-            SignUpMessages signUpMessage = SignUpController.validateUserData(recievedUser.getEmail(), recievedUser.getPassword(), recievedUser.getPassword(), recievedUser.getUsername());
-            if(signUpMessage == SignUpMessages.SUCCESS) {
-                result = DatabaseQueryController.addUser(recievedUser.getUsername(), recievedUser.getPassword(), recievedUser.getEmail());
-            }
-            else {
-                result = signUpMessage.message;
+            Messages signUpMessage = SignUpController.validateUserData(recievedUser.getEmail(), recievedUser.getPassword(), recievedUser.getPassword(), recievedUser.getUsername());
+            if(signUpMessage == Messages.SUCCESS) {
+                signUpMessage = DatabaseQueryController.addUser(recievedUser.getUsername(), recievedUser.getPassword(), recievedUser.getEmail());
             }
 
-            byte[] responseBytes = result.getBytes("UTF-8");
+            byte[] responseBytes = signUpMessage.toByte("UTF-8");
             exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
             exchange.sendResponseHeaders(200, responseBytes.length); // use the actual length of the response body
 
@@ -100,10 +96,10 @@ public class RequestHandler {
                 os.write(responseBytes);
             }
         } else {
-            String response = "Method Not Allowed";
-            exchange.sendResponseHeaders(405, response.getBytes().length); // 405 Method Not Allowed
+            byte[] response = Messages.METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(405, response.length); // 405 Method Not Allowed
             try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.getBytes());
+                os.write(response);
             }
         }
     }

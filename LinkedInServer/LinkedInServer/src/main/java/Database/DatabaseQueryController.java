@@ -1,7 +1,7 @@
 package Database;
 
 import Controllers.SignUpController;
-import Model.SignUpMessages;
+import Model.Messages;
 import Model.User;
 
 import java.sql.Connection;
@@ -77,7 +77,7 @@ public class DatabaseQueryController {
             db.close();
         }
     }
-    public static String addUser(String username, String password, String email) {
+    public static Messages addUser(String username, String password, String email) {
         try {
             Connection db = null;
             Statement stmt = null;
@@ -88,30 +88,30 @@ public class DatabaseQueryController {
             String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s'", username);
             ResultSet userRs = stmt.executeQuery(usernameCheckSql);
             if(userRs.next()) {
-                return SignUpMessages.TAKEN_USERNAME.message;
+                return Messages.TAKEN_USERNAME;
             }
 
             String emailCheckSql = String.format("SELECT * FROM USER WHERE email = '%s'", email);
             ResultSet emailRs = stmt.executeQuery(emailCheckSql);
             if(emailRs.next()) {
-                return SignUpMessages.EMAIL_EXISTS.message;
+                return Messages.EMAIL_EXISTS;
             }
 
             String sql = String.format("INSERT INTO USER (username, password, email) VALUES ('%s', '%s', '%s');", username, password, email);
 
             try {
                 stmt.executeUpdate(sql);
-                return "Successfully added user";
+                return Messages.SUCCESS;
             } catch ( Exception e ) {
                 e.printStackTrace();
-                return "Internal server error";
+                return Messages.INTERNAL_ERROR;
             } finally {
                 stmt.close();
                 db.close();
             }
         } catch( Exception e ) {
             e.printStackTrace();
-            return "Internal server error";
+            return Messages.INTERNAL_ERROR;
         }
     }
 }

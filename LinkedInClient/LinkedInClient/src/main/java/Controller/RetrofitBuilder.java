@@ -1,6 +1,7 @@
 package Controller;
 
 
+import Model.Messages;
 import Model.User;
 import Service.UserService;
 import com.google.gson.Gson;
@@ -88,27 +89,32 @@ public class RetrofitBuilder {
 //            return null; }
 //    }
 
-    public String syncCallSignUp(User user){
+    public Messages syncCallSignUp(User user){
         Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callSync = service.signUp(user);
 
         try {
             Response<ResponseBody> response = callSync.execute();
-            return response.body().string();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodyBytes = response.body().bytes();
+                return Messages.fromByte(responseBodyBytes);
+            } else {
+                return Messages.INTERNAL_ERROR;
+            }
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
+            return Messages.INTERNAL_ERROR;
         }
     }
 
     public String syncCallLogin() {
         Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
-        Call<Void> callLogin = service.login();
+        Call<ResponseBody> callLogin = service.login();
 
         try {
-            Response<Void> response = callLogin.execute();
+            Response<ResponseBody> response = callLogin.execute();
 
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -1,6 +1,6 @@
 package Controller;
 
-import Model.SignUpMessages;
+import Model.Messages;
 import Model.User;
 
 public class SignUpController {
@@ -42,20 +42,20 @@ public class SignUpController {
     }
 
 
-    public static SignUpMessages validateUserData(String email, String password, String confirmationPassword, String username){
+    public static Messages validateUserData(String email, String password, String confirmationPassword, String username){
         if(!isValidEmailAddress(email)){
-            return SignUpMessages.INVALID_EMAIL;
+            return Messages.INVALID_EMAIL;
         }
         if(!isValidPassword(password)){
-            return SignUpMessages.INVALID_PASSWORD;
+            return Messages.INVALID_PASSWORD;
         }
         if(!isValidName(username)){
-            return SignUpMessages.INVALID_USERNAME;
+            return Messages.INVALID_USERNAME;
         }
         if(!confirmationPassword.equals(password)){
-            return SignUpMessages.CONFIRMATION_PASSWORD;
+            return Messages.CONFIRMATION_PASSWORD;
         }
-        return SignUpMessages.SUCCESS;
+        return Messages.SUCCESS;
     }
 
 
