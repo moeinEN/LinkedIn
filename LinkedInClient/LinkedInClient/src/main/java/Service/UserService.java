@@ -25,4 +25,7 @@ public interface UserService {
 
     @GET("/hello")
     public Call<JsonObject> sayHello();
+
+    @POST("/login")
+    Call<Void> login();
 }

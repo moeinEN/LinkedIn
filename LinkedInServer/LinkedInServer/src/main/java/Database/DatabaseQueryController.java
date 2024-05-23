@@ -1,5 +1,7 @@
 package Database;
 
+import Controllers.SignUpController;
+import Model.SignUpMessages;
 import Model.User;
 
 import java.sql.Connection;
@@ -35,6 +37,17 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+
+    public static void createTableTokens() throws SQLException {
+        String sql = "CREATE TABLE TOKENS (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    token VARCHAR(255) UNIQUE,\n" +
+                "    user_id INTEGER,\n" +
+                "    expire_status VARCHAR(255),\n" +
+                ");";
+        createTable(sql);
+    }
+
     public static User getUser(String username) throws SQLException {
         String sql = "SELECT * FROM USER WHERE username = '" + username + "';";
         Connection db = null;
@@ -66,25 +79,39 @@ public class DatabaseQueryController {
     }
     public static String addUser(String username, String password, String email) {
         try {
-            String sql = String.format("INSERT INTO USER (username, password, email) VALUES ('%s', '%s', '%s');", username, password, email);
             Connection db = null;
             Statement stmt = null;
             db = DbController.getConnection();
             db.setAutoCommit(true);
             stmt = db.createStatement();
+
+            String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s'", username);
+            ResultSet userRs = stmt.executeQuery(usernameCheckSql);
+            if(userRs.next()) {
+                return SignUpMessages.TAKEN_USERNAME.message;
+            }
+
+            String emailCheckSql = String.format("SELECT * FROM USER WHERE email = '%s'", email);
+            ResultSet emailRs = stmt.executeQuery(emailCheckSql);
+            if(emailRs.next()) {
+                return SignUpMessages.EMAIL_EXISTS.message;
+            }
+
+            String sql = String.format("INSERT INTO USER (username, password, email) VALUES ('%s', '%s', '%s');", username, password, email);
+
             try {
                 stmt.executeUpdate(sql);
                 return "Successfully added user";
             } catch ( Exception e ) {
                 e.printStackTrace();
-                return "Insertion failed";
+                return "Internal server error";
             } finally {
                 stmt.close();
                 db.close();
             }
         } catch( Exception e ) {
             e.printStackTrace();
-            return "Insertion failed";
+            return "Internal server error";
         }
     }
 }

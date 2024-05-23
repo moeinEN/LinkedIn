@@ -14,10 +14,6 @@ import java.io.UnsupportedEncodingException;
 public class User {
     @SerializedName("id")
     private long id;
-    @SerializedName("name")
-    private String name;
-    @SerializedName("familyName")
-    private String familyName;
     @SerializedName("username")
     private String username;
     @SerializedName("password")
