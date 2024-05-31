@@ -16,9 +16,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.IOException;
 
+import static Model.Messages.USER_LOGGED_IN_SUCCESSFULLY;
+
 public class RetrofitBuilder {
 
-    private static final String BASE_URL = "http://127.0.0.1:8080";
+    private static final String BASE_URL = "http://localhost:8080";
 
 
     private Retrofit retrofitBuilder(){
@@ -33,6 +35,7 @@ public class RetrofitBuilder {
                 .build();
         return retrofit;
     }
+    private Retrofit retrofit = retrofitBuilder();
 
     private User syncCallGetUserService(String username){
         Retrofit retrofit = this.retrofitBuilder();
@@ -47,7 +50,6 @@ public class RetrofitBuilder {
     }
 
     public User syncCallGetUser(){
-        Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
         Call<User> callSync = service.getUser("test");
 
@@ -61,7 +63,6 @@ public class RetrofitBuilder {
     }
 
     public JsonObject syncCallSayHello(){
-        Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
         Call<JsonObject> callSync = service.sayHello();
 
@@ -89,7 +90,6 @@ public class RetrofitBuilder {
 //    }
 
     public Messages syncCallSignUp(RegisterCredentials registerCredentials){
-        Retrofit retrofit = this.retrofitBuilder();
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callSync = service.signUp(registerCredentials);
 
@@ -107,25 +107,24 @@ public class RetrofitBuilder {
         }
     }
 
-    public String syncCallLogin(LoginCredentials loginCredentials) {
-        Retrofit retrofit = this.retrofitBuilder();
+    public Messages syncCallLogin(LoginCredentials loginCredentials) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callLogin = service.login(loginCredentials);
-
+        String responseString;
         try {
             Response<ResponseBody> response = callLogin.execute();
             if (response.isSuccessful() && response.body() != null) {
                 byte[] responseBodyBytes = response.body().bytes();
                 Gson gson = new Gson();
-                String responseString = gson.fromJson(new String(responseBodyBytes), String.class);
+                responseString = gson.fromJson(new String(responseBodyBytes), String.class);
                 Cookies.setSessionToken(responseString);
             } else {
-                return Messages.INTERNAL_ERROR.message;
+                return Messages.INTERNAL_ERROR;
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            return null;
+            return Messages.INTERNAL_ERROR;
         }
-        return "";
+        return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
 }

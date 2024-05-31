@@ -16,4 +16,8 @@ public class Cookies {
     public static void setSessionToken(String sessionToken) {
         Cookies.sessionToken = sessionToken;
     }
+
+    public static String getSessionToken() {
+        return sessionToken;
+    }
 }

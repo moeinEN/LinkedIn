@@ -1,9 +1,11 @@
 package Model;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
 
+@Getter
 public enum Messages {
     TAKEN_USERNAME("This username is already taken!", 0),
     INVALID_USERNAME("Username is invalid!", 1),
@@ -14,11 +16,12 @@ public enum Messages {
     INTERNAL_ERROR("Internal error!", 6),
     METHOD_NOT_ALLOWED("Method not allowed!", 7),
     INVALID_CREDENTIALS("Username or password is invalid!", 8),
-    SUCCESS("success", 9);
+    USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully.", 9),
+    SUCCESS("success", 10);
 
 
-    public final String message;
-    public final int statusCode;
+    private final String message;
+    private final int statusCode;
 
     private Messages(String message, int statusCode) {
         this.message = message;
