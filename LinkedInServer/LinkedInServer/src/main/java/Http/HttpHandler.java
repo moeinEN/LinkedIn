@@ -68,27 +68,16 @@ public class HttpHandler {
             }
         });
 
-//        server.createContext("/login", new com.sun.net.httpserver.HttpHandler() {
-//            @Override
-//            public void handle(HttpExchange exchange) throws IOException {
-//                if("POST".equals(exchange.getRequestMethod())) {
-//                    // Assume user authentication is successful and JWT token is generated
-//                    String jwtToken = "testToken123";
-//
-//                    // Create the cookie header
-//                    String setCookieHeader = "Set-Cookie: sessionToken=" + jwtToken + "; Path=/; HttpOnly";
-//                    exchange.getResponseHeaders().add("Set-Cookie", setCookieHeader);
-//
-//                    String response = "Login successful!";
-//                    exchange.sendResponseHeaders(200, response.length());
-//                    OutputStream os = exchange.getResponseBody();
-//                    os.write(response.getBytes());
-//                    os.close();
-//                } else {
-//                    exchange.sendResponseHeaders(405, -1); // Method Not Allowed
-//                }
-//            }
-//        });
+        server.createContext("/login", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.loginHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
 
         // Start the server
         server.setExecutor(null); // creates a default executor

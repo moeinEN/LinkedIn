@@ -1,5 +1,6 @@
 import Controller.RetrofitBuilder;
 import Controller.SignUpController;
+import Model.LoginCredentials;
 import Model.Messages;
 
 public class Main {
@@ -23,5 +24,9 @@ public class Main {
         else {
             System.out.println(signUpMessages.message);
         }
+
+
+        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+        System.out.println(retrofitBuilder.syncCallLogin(loginCredentials));
     }
 }

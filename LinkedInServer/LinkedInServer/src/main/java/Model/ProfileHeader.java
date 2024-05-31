@@ -21,5 +21,4 @@ public class ProfileHeader {
     private String profession;
     private String contactInfo;
     private String jobStatus;
-
 }

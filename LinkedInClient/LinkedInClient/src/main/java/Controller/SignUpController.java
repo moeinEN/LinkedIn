@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Messages;
+import Model.RegisterCredentials;
 import Model.User;
 
 public class SignUpController {
@@ -59,11 +60,12 @@ public class SignUpController {
     }
 
 
-    public static User newUser(String email, String password, String confirmationPassword, String username) {
-            User user = new User();
-            user.setEmail(email);
-            user.setPassword(password);
-            user.setUsername(username);
-            return user;
+    public static RegisterCredentials newUser(String email, String password, String confirmationPassword, String username) {
+            RegisterCredentials registerCredentials = new RegisterCredentials();
+            registerCredentials.setEmail(email);
+            registerCredentials.setPassword(password);
+            registerCredentials.setConfirmationPassword(confirmationPassword);
+            registerCredentials.setUsername(username);
+            return registerCredentials;
     }
 }

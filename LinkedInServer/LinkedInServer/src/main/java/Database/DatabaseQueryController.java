@@ -1,6 +1,7 @@
 package Database;
 
 import Controllers.SignUpController;
+import Model.LoginCredentials;
 import Model.Messages;
 import Model.User;
 
@@ -8,8 +9,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Objects;
 
 public class DatabaseQueryController {
+    //TODO rollback option
+
+
     private static void createTable (String script) throws SQLException {
         Connection db = null;
         Statement stmt = null;
@@ -29,15 +34,12 @@ public class DatabaseQueryController {
     public static void createTableUsers() throws SQLException {
         String sql = "CREATE TABLE USER (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "    name VARCHAR(255),\n" +
-                "    familyName VARCHAR(255),\n" +
                 "    username VARCHAR(255) UNIQUE,\n" +
                 "    password VARCHAR(255),\n" +
                 "    email VARCHAR(255) UNIQUE\n" +
                 ");";
         createTable(sql);
     }
-
     public static void createTableTokens() throws SQLException {
         String sql = "CREATE TABLE TOKENS (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -47,9 +49,8 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-
     public static User getUser(String username) throws SQLException {
-        String sql = "SELECT * FROM USER WHERE username = '" + username + "';";
+        String sql = String.format("SELECT * FROM USER WHERE username = '%s';", username);
         Connection db = null;
         Statement stmt = null;
         db = DbController.getConnection();
@@ -57,7 +58,7 @@ public class DatabaseQueryController {
         stmt = db.createStatement();
         try {
             ResultSet rs = stmt.executeQuery(sql);
-            if (rs.wasNull()) {
+            if (Objects.isNull(rs)) {
                 return null;
             }
             User user = new User();
@@ -113,5 +114,35 @@ public class DatabaseQueryController {
             e.printStackTrace();
             return Messages.INTERNAL_ERROR;
         }
+    }
+    public static Messages checkCredentials(LoginCredentials loginCredentials) {
+        try {
+            Connection db = null;
+            Statement stmt = null;
+            db = DbController.getConnection();
+            db.setAutoCommit(true);
+            stmt = db.createStatement();
+
+            // search for valid login credentials
+            String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s' AND password = '%s'", loginCredentials.getUsername(), loginCredentials.getPassword());
+            try {
+                ResultSet userRs = stmt.executeQuery(usernameCheckSql);
+                if(!userRs.next()) {
+                    return Messages.INVALID_CREDENTIALS;
+                }
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                return Messages.INTERNAL_ERROR;
+            }
+            finally {
+                stmt.close();
+                db.close();
+            }
+        } catch( Exception e ) {
+            e.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+        return Messages.SUCCESS;
     }
 }

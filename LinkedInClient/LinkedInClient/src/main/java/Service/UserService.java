@@ -1,5 +1,7 @@
 package Service;
 
+import Model.LoginCredentials;
+import Model.RegisterCredentials;
 import Model.User;
 import com.google.gson.JsonObject;
 import okhttp3.ResponseBody;
@@ -18,7 +20,7 @@ public interface UserService {
     public Call<List<User>> getUsers();
 
     @POST("/user/register")
-    public Call<ResponseBody> signUp(@Body User user);
+    public Call<ResponseBody> signUp(@Body RegisterCredentials registerCredentials);
 
     @GET("/users/{username}")
     public Call<User> getUser(@Path("username") String username);
@@ -27,5 +29,5 @@ public interface UserService {
     public Call<JsonObject> sayHello();
 
     @POST("/login")
-    Call<ResponseBody> login();
+    Call<ResponseBody> login(@Body LoginCredentials loginCredentials);
 }

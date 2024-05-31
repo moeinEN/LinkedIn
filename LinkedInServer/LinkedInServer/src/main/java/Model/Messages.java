@@ -13,6 +13,7 @@ public enum Messages {
     EMAIL_EXISTS("email already exists!"),
     INTERNAL_ERROR("Internal error!"),
     METHOD_NOT_ALLOWED("Method not allowed!"),
+    INVALID_CREDENTIALS("Username or password is invalid!"),
     SUCCESS("success");
 
 
