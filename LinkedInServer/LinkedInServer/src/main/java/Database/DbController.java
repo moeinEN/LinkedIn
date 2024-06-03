@@ -18,7 +18,7 @@ public class DbController {
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        System.out.println("Connected to database");
+        //System.out.println("Connected to database");
 
         return db;
     }

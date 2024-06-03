@@ -19,7 +19,7 @@ import java.net.InetSocketAddress;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        DatabaseQueryController.createTableUsers();
+        //DatabaseQueryController.createTableUsers();
 
         // Create HTTP server listening on port 8080
         HttpServer httpServer = HttpHandler.makeConnectionPoint("localhost", 8080);

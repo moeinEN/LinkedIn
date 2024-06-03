@@ -7,14 +7,14 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
 import java.util.Base64;
+import java.util.Date;
 
 public class JwtHandler {
-    // Your 256-bit secret key (must be base64 encoded)
-    // password : linkedInEncoder (encoded in ISO-8859_1 base64)
-    private static final String secret = "bGlua2VkSW5FbmNvZGVy";
+    // Your 384-bit secret key (base64 encoded)
+    private static final String secret = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==";
 
     // Decode the base64-encoded key
     private static final byte[] decodedKey = Base64.getDecoder().decode(secret);
