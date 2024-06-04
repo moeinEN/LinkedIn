@@ -1,3 +1,4 @@
+import Controller.JwtHandler;
 import Database.DatabaseQueryController;
 import Database.DbController;
 import Http.HttpHandler;

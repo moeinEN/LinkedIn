@@ -9,7 +9,6 @@ public class DbController {
 
     private static Logger logger = Logger.getLogger(DbController.class.getName());
 
-
     public static Connection getConnection() {
         Connection db = null;
         try {
@@ -22,11 +21,9 @@ public class DbController {
 
         return db;
     }
-
     public static void closeConnection(Connection db) throws SQLException {
         db.close();
     }
-
     public static Statement getStatement(Connection db) {
         Statement stmt = null;
 
@@ -38,7 +35,6 @@ public class DbController {
         logger.log(Level.INFO, "Statement created");
         return stmt;
     }
-
     public static void closeStatement(Statement stmt) throws SQLException {
         stmt.close();
     }

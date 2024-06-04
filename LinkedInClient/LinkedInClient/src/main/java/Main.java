@@ -19,8 +19,8 @@ public class Main {
 //            System.out.println(signUpMessages.message);
 //        }
 //
-//        if((signUpMessages = SignUpController.validateUserData("kosanat3221@yahoo.com", "teteEST@123", "teteEST@123", "Kosmadar")) == Messages.SUCCESS) {
-//            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("kosanat3221@yahoo.com", "teteEST@123", "teteEST@123", "Kosmadar")).message);
+//        if((signUpMessages = SignUpController.validateUserData("whatthehell@yahoo.com", "teteEST@123", "teteEST@123", "testProject")) == Messages.SUCCESS) {
+//            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("whatthehell@yahoo.com", "teteEST@123", "teteEST@123", "testProject")).message);
 //        }
 //        else {
 //            System.out.println(signUpMessages.message);

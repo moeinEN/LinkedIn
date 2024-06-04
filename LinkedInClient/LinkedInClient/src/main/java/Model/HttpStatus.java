@@ -77,4 +77,12 @@ public enum HttpStatus {
         this.value = value;
         this.reasonPhrase = reasonPhrase;
     }
+
+    public int getValue() {
+        return value;
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    }
 }

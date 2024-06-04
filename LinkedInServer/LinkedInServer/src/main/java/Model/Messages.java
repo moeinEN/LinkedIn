@@ -1,26 +1,33 @@
 package Model;
 
 import com.google.gson.Gson;
+import lombok.Getter;
 
 import java.io.UnsupportedEncodingException;
 
+@Getter
 public enum Messages {
-    TAKEN_USERNAME("This username is already taken!"),
-    INVALID_USERNAME("Username is invalid!"),
-    INVALID_PASSWORD("Password is invalid!"),
-    CONFIRMATION_PASSWORD("Confirmation does not match the password!"),
-    INVALID_EMAIL("email is invalid!"),
-    EMAIL_EXISTS("email already exists!"),
-    INTERNAL_ERROR("Internal error!"),
-    METHOD_NOT_ALLOWED("Method not allowed!"),
-    INVALID_CREDENTIALS("Username or password is invalid!"),
-    SUCCESS("success");
+    TAKEN_USERNAME("This username is already taken!", 0),
+    INVALID_USERNAME("Username is invalid!", 1),
+    INVALID_PASSWORD("Password is invalid!", 2),
+    CONFIRMATION_PASSWORD("Confirmation does not match the password!", 3),
+    INVALID_EMAIL("email is invalid!", 4),
+    EMAIL_EXISTS("email already exists!", 5),
+    INTERNAL_ERROR("Internal error!", 6),
+    METHOD_NOT_ALLOWED("Method not allowed!", 7),
+    INVALID_CREDENTIALS("Username or password is invalid!", 8),
+    USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully.", 9),
+    SESSION_EXPIRED("Session expired!", 10),
+    INVALID_TOKEN("Invalid token!", 11),
+    SUCCESS("success", 12);
 
 
-    public final String message;
+    private final String message;
+    private final int statusCode;
 
-    private Messages(String message) {
+    private Messages(String message, int statusCode) {
         this.message = message;
+        this.statusCode = statusCode;
     }
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
@@ -38,5 +45,13 @@ public enum Messages {
             e.printStackTrace();
             return INTERNAL_ERROR; // default in case of error
         }
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }

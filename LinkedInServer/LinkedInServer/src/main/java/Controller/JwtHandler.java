@@ -1,20 +1,20 @@
-package Controllers;
+package Controller;
 
+import Database.DatabaseQueryController;
+import Model.Messages;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
 public class JwtHandler {
-    // Your 384-bit secret key (base64 encoded)
-    private static final String secret = "YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==";
+    // Your 384-bit secret key (base64 encoded) : "aSimpleSecretKeyBase64Encoded384BitForLinkedInProject"
+    private static final String secret = "YVNpbXBsZVNlY3JldEtleUJhc2U2NEVuY29kZWQzODRCaXRGb3JMaW5rZWRJblByb2plY3Q=";
 
     // Decode the base64-encoded key
     private static final byte[] decodedKey = Base64.getDecoder().decode(secret);
@@ -51,5 +51,34 @@ public class JwtHandler {
         // Get the claims from the token
         Claims claims = claimsJws.getBody();
         return claims;
+    }
+
+    public static Messages validateUserSession(String jwt) {
+        Claims claims = null;
+        try {
+            claims = decodeJwtToken(jwt);
+        }
+        catch (io.jsonwebtoken.MalformedJwtException e) {
+            e.printStackTrace();
+            return Messages.INVALID_TOKEN;
+        }
+
+        if(!checkExpiryDate(claims.getExpiration())) {
+            return Messages.SESSION_EXPIRED;
+        }
+
+        if(!claims.getSubject().equals("Login Credentials")) {
+            return Messages.INVALID_TOKEN;
+        }
+
+        if(DatabaseQueryController.CheckJwtCredentials(claims.get("username", String.class), claims.get("password", String.class), claims.get("email", String.class)) != Messages.SUCCESS) {
+            return Messages.INVALID_TOKEN;
+        }
+        return Messages.SUCCESS;
+    }
+
+    public static boolean checkExpiryDate(Date expiryDate) {
+        Date now = new Date();
+        return expiryDate.before(now);
     }
 }

@@ -1,7 +1,6 @@
-package Controllers;
+package Controller;
 
 import Model.Messages;
-import Model.User;
 
 public class SignUpController {
     // Validate email address : example@gmail.com
@@ -56,14 +55,5 @@ public class SignUpController {
             return Messages.CONFIRMATION_PASSWORD;
         }
         return Messages.SUCCESS;
-    }
-
-
-    public static User newUser(String email, String password, String confirmationPassword, String username) {
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setUsername(username);
-        return user;
     }
 }

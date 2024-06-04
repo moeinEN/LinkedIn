@@ -1,6 +1,5 @@
 package Database;
 
-import Controllers.SignUpController;
 import Model.LoginCredentials;
 import Model.Messages;
 import Model.User;
@@ -125,6 +124,36 @@ public class DatabaseQueryController {
 
             // search for valid login credentials
             String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s' AND password = '%s'", loginCredentials.getUsername(), loginCredentials.getPassword());
+            try {
+                ResultSet userRs = stmt.executeQuery(usernameCheckSql);
+                if(!userRs.next()) {
+                    return Messages.INVALID_CREDENTIALS;
+                }
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                return Messages.INTERNAL_ERROR;
+            }
+            finally {
+                stmt.close();
+                db.close();
+            }
+        } catch( Exception e ) {
+            e.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+        return Messages.SUCCESS;
+    }
+    public static Messages CheckJwtCredentials(String username, String password, String email) {
+        try {
+            Connection db = null;
+            Statement stmt = null;
+            db = DbController.getConnection();
+            db.setAutoCommit(true);
+            stmt = db.createStatement();
+
+            // search for valid login credentials
+            String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s' AND password = '%s' AND email = '%s'", username, password, email);
             try {
                 ResultSet userRs = stmt.executeQuery(usernameCheckSql);
                 if(!userRs.next()) {

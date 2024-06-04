@@ -58,14 +58,4 @@ public class SignUpController {
         }
         return Messages.SUCCESS;
     }
-
-
-    public static RegisterCredentials newUser(String email, String password, String confirmationPassword, String username) {
-            RegisterCredentials registerCredentials = new RegisterCredentials();
-            registerCredentials.setEmail(email);
-            registerCredentials.setPassword(password);
-            registerCredentials.setConfirmationPassword(confirmationPassword);
-            registerCredentials.setUsername(username);
-            return registerCredentials;
-    }
 }

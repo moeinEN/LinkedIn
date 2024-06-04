@@ -1,7 +1,6 @@
-package Controllers;
+package Controller;
 
 import Database.DatabaseQueryController;
-import Database.DbController;
 import Model.LoginCredentials;
 import Model.Messages;
 import Model.RegisterCredentials;
@@ -15,8 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class RequestHandler {
@@ -127,7 +124,7 @@ public class RequestHandler {
                 response = JwtHandler.createJwtToken(((Long) loginUser.getId()).toString(), loginUser.getUsername(), loginUser.getPassword(), loginUser.getEmail(), 3600000L);
             }
             else {
-                response = loginMessage.message;
+                response = loginMessage.getMessage();
                 responseCode = 401;
             }
 

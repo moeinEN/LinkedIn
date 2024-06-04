@@ -1,5 +1,6 @@
 package Model;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.*;
 
 @Getter
@@ -8,7 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class Profile {
+    @SerializedName("ProfileContactInfo")
     private ProfileContactInfo contactInfo;
+    @SerializedName("ProfileEducation")
     private ProfileEducation education;
+    @SerializedName("ProfileHeader")
     private ProfileHeader header;
 }

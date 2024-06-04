@@ -1,21 +1,12 @@
 package Http;
 
-import Controllers.RequestHandler;
-import Database.DbController;
-import Model.User;
-import com.google.gson.Gson;
+import Controller.RequestHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class HttpHandler {

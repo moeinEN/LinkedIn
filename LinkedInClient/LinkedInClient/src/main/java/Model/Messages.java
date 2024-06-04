@@ -17,7 +17,9 @@ public enum Messages {
     METHOD_NOT_ALLOWED("Method not allowed!", 7),
     INVALID_CREDENTIALS("Username or password is invalid!", 8),
     USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully.", 9),
-    SUCCESS("success", 10);
+    SESSION_EXPIRED("Session expired!", 10),
+    INVALID_TOKEN("Invalid token!", 11),
+    SUCCESS("success", 12);
 
 
     private final String message;
@@ -43,5 +45,13 @@ public enum Messages {
             e.printStackTrace();
             return INTERNAL_ERROR; // default in case of error
         }
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
     }
 }
