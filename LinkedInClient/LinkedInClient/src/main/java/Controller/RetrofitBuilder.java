@@ -127,4 +127,22 @@ public class RetrofitBuilder {
         }
         return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
+
+    public HttpStatus syncCallProfile(Profile profile){
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callProfile = service.profile(profile, Cookies.getSessionToken());
+        HttpStatus ServerResponse;
+        try {
+            Response<ResponseBody> response = callProfile.execute();
+            byte[] responseBodyBytes = response.body().bytes();
+            Gson gson = new Gson();
+            ServerResponse = gson.fromJson(new String(responseBodyBytes), HttpStatus.class);
+
+            return ServerResponse;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+    }
 }

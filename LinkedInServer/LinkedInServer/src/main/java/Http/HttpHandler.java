@@ -32,13 +32,6 @@ public class HttpHandler {
             }
         });
 
-        server.createContext("/user/register", new com.sun.net.httpserver.HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                RequestHandler.registerHandler(exchange);
-            }
-        });
-
         // Handle GET requests at /bye
         server.createContext("/bye", new com.sun.net.httpserver.HttpHandler() {
             @Override
@@ -59,12 +52,29 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/user/register", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                RequestHandler.registerHandler(exchange);
+            }
+        });
+
         server.createContext("/login", new com.sun.net.httpserver.HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {
                 try {
                     RequestHandler.loginHandler(exchange);
                 } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/user/profile", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.profileHandler(exchange);
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }

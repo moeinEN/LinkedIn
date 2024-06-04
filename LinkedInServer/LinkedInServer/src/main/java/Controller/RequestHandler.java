@@ -1,11 +1,9 @@
 package Controller;
 
 import Database.DatabaseQueryController;
-import Model.LoginCredentials;
-import Model.Messages;
-import Model.RegisterCredentials;
-import Model.User;
+import Model.*;
 import com.google.gson.Gson;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.List;
 
 public class RequestHandler {
     public static void helloHandler(HttpExchange exchange) throws IOException {
@@ -135,6 +134,46 @@ public class RequestHandler {
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(responseBytes);
             }
+        } else {
+            byte[] response = Messages.METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(405, response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    public static void profileHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            int responceCode = 200;
+
+            boolean tokensValid = false;
+            Headers requestHeaders = exchange.getRequestHeaders();
+            if (requestHeaders.containsKey("sessionToken")) {
+                List<String> sessionTokens = requestHeaders.get("sessionToken");
+                String sessionToken = sessionTokens.get(0);
+                if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
+                    tokensValid = true;
+                }
+                else {
+                    responceCode = HttpStatus.UNAUTHORIZED.getValue();
+                }
+            } else {
+                responceCode = HttpStatus.UNAUTHORIZED.getValue();
+            }
+
+            if (tokensValid) {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    Profile recievedProfile = gson.fromJson(reader, Profile.class);
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    exchange.sendResponseHeaders(HttpStatus.BAD_REQUEST.getValue(), -1);
+                }
+            }
+
         } else {
             byte[] response = Messages.METHOD_NOT_ALLOWED.toByte("UTF-8");
             exchange.sendResponseHeaders(405, response.length); // 405 Method Not Allowed
