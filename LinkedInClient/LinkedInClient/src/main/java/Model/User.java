@@ -28,6 +28,7 @@ public class User {
         return jsonString.getBytes(charset);
     }
 
+
     public static User fromByte(byte[] data) {
         Gson gson = new Gson();
         return gson.fromJson(new String(data), User.class);
