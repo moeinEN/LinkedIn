@@ -20,4 +20,5 @@ public class ProfileEducation {
     private String description;
     private List<EducationalSkills> educationalSkills;
     private boolean informOthersForTheProfileUpdate;
+    private boolean isCurrentProfileEducation;
 }

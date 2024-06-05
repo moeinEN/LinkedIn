@@ -9,4 +9,8 @@ public enum JobWorkplaceStatus {
     private JobWorkplaceStatus(String value) {
         this.value = value;
     }
+
+    public String getValue() {
+        return value;
+    }
 }

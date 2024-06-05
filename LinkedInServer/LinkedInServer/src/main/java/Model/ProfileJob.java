@@ -17,18 +17,18 @@ public class ProfileJob {
     private String companyName;
     private String workplaceLocation;
     private JobWorkplaceStatus jobWorkplaceStatus;
-    private boolean companyActivityStatus; //TODO وضعیت فعالیت در شرکت
+    private Boolean companyActivityStatus; //TODO وضعیت فعالیت در شرکت
     private Date startDate;
     private Date endDate;
-    private boolean currentlyWorking;
+    private Boolean currentlyWorking;
     private String description;
     private List<JobSkills> jobSkills;
-    private boolean informOthersForTheProfileUpdate;
+    private Boolean informOthersForTheProfileUpdate;
+    private Boolean isCurrentProfileJob;
 
     List<String> invalidFields = new ArrayList<>();
 
-
-    public ProfileJob(boolean informOthersForTheProfileUpdate, List<JobSkills> jobSkills, String description, boolean currentlyWorking, Date endDate, Date startDate, boolean companyActivityStatus, JobWorkplaceStatus jobWorkplaceStatus, String workplaceLocation, String companyName, JobStatus jobStatus, String title) {
+    public ProfileJob(Boolean informOthersForTheProfileUpdate, List<JobSkills> jobSkills, String description, Boolean currentlyWorking, Date endDate, Date startDate, Boolean companyActivityStatus, JobWorkplaceStatus jobWorkplaceStatus, String workplaceLocation, String companyName, JobStatus jobStatus, String title, Boolean isCurrentProfileJob) {
         this.informOthersForTheProfileUpdate = informOthersForTheProfileUpdate;
 
         if (jobSkills.size() <= 5) this.jobSkills = jobSkills;
@@ -53,6 +53,8 @@ public class ProfileJob {
 
         if (title.length() <= 40) this.title = title;
         else invalidFields.add("title");
+
+        this.isCurrentProfileJob = isCurrentProfileJob;
 
         if(!invalidFields.isEmpty()) {
             String invalidFieldString = "";
