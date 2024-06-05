@@ -61,7 +61,7 @@ public class ProfileHeader {
         if(!invalidFields.isEmpty()) {
             String invalidFieldString = "";
             for (String invalidField : invalidFields) {
-                invalidField = invalidField + "\\|";
+                invalidFieldString = invalidField + "\\|";
             }
             throw new IllegalArgumentException(invalidFieldString);
         }
