@@ -77,6 +77,11 @@ public class JwtHandler {
         return Messages.SUCCESS;
     }
 
+    public static int getUserIdFromJwtToken(String jwt) throws IllegalArgumentException {
+        Claims claims = decodeJwtToken(jwt);
+        return Integer.parseInt(claims.get("userId", String.class));
+    }
+
     public static boolean checkExpiryDate(Date expiryDate) {
         Date now = new Date();
         return expiryDate.before(now);

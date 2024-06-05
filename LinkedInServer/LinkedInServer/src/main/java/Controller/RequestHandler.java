@@ -147,12 +147,14 @@ public class RequestHandler {
             int responceCode = 200;
 
             boolean tokensValid = false;
+            int userId = 0;
             Headers requestHeaders = exchange.getRequestHeaders();
             if (requestHeaders.containsKey("sessionToken")) {
                 List<String> sessionTokens = requestHeaders.get("sessionToken");
                 String sessionToken = sessionTokens.get(0);
                 if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
                     tokensValid = true;
+                    userId = JwtHandler.getUserIdFromJwtToken(sessionToken);
                 }
                 else {
                     responceCode = HttpStatus.UNAUTHORIZED.getValue();
@@ -166,6 +168,7 @@ public class RequestHandler {
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
                     Profile recievedProfile = gson.fromJson(reader, Profile.class);
+                    //validate profile
 
                 }
                 catch (Exception e) {
