@@ -34,6 +34,102 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+    public static void createTableComments() throws SQLException {
+        String sql = "CREATE TABLE Comments (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    postId INTEGER,\n" +
+                "    commenterId INTEGER,\n" +
+                "    commentText TEXT,\n" +
+                "    FOREIGN KEY (postId) REFERENCES Post(id),\n" +
+                "    FOREIGN KEY (commenterId) REFERENCES USER(id)\n" + /*user or profile id??*/
+                ");";
+        createTable(sql);
+    }
+    public static void createTableLikes() throws SQLException {
+        String sql = "CREATE TABLE Likes (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    postId INTEGER,\n" +
+                "    likerId INTEGER,\n" +
+                "    FOREIGN KEY (postId) REFERENCES Post(id),\n" +
+                "    FOREIGN KEY (likerId) REFERENCES USER(id)\n" + /*user or profile id??*/
+                ");";
+        createTable(sql);
+    }
+    public static void createTablePosts() throws SQLException {
+        String sql = "CREATE TABLE Posts (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    caption TEXT,\n" +
+                "    identification INTEGER,\n" +
+                "    FOREIGN KEY (identification) REFERENCES USER(id)\n" + /*user or profile id??*/
+                ");";
+        createTable(sql);
+    }
+    public static void createTableConnections() throws SQLException {
+        String sql = "CREATE TABLE Connections (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    senderSpecifiedProfileId INTEGER,\n" +
+                "    receiverSpecifiedProfileId INTEGER,\n" +
+                "    connectionStatus TEXT,\n" +
+                "    requestSentDate TEXT,\n" +
+                "    FOREIGN KEY (senderSpecifiedProfileId) REFERENCES Profile(id),\n" +
+                "    FOREIGN KEY (receiverSpecifiedProfileId) REFERENCES Profile(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableProfileSports() throws SQLException {
+        String sql = "CREATE TABLE ProfileJob (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedProfileExperienceId INTEGER,\n" +
+                "    desc TEXT,\n" +
+                "    date TEXT,\n" +
+                "    FOREIGN KEY (specifiedProfileExperienceId) REFERENCES ProfileExperience(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableProfileVoluntaryActivities() throws SQLException {
+        String sql = "CREATE TABLE ProfileVoluntaryActivities (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedProfileExperienceId INTEGER,\n" +
+                "    desc TEXT,\n" +
+                "    date TEXT,\n" +
+                "    FOREIGN KEY (specifiedProfileExperienceId) REFERENCES ProfileExperience(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableProfileExperience() throws SQLException {
+        String sql = "CREATE TABLE ProfileExperience (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedProfileId INTEGER,\n" +
+                "    militaryService TEXT,\n" +
+                "    militaryServiceDate TEXT,\n" +
+                "    ceoExperience TEXT,\n" +
+                "    ceoExperienceDate TEXT,\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableProfileSkills() throws SQLException {
+        String sql = "CREATE TABLE ProfileSkills (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedProfileId INTEGER,\n" +
+                "    jobSkills TEXT,\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableProfileOrganizations() throws SQLException {
+        String sql = "CREATE TABLE OrganizationCooperate (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedProfileId INTEGER,\n" +
+                "    organizationName TEXT,\n" +
+                "    positionInOrganization TEXT,\n" +
+                "    startCooperateDate TEXT,\n" +
+                "    endCooperateDate TEXT,\n" +
+                "    isActive INTEGER,\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
+                ");";
+        createTable(sql);
+    }
     public static void createTableProfileJob() throws SQLException {
         String sql = "CREATE TABLE ProfileJob (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -99,12 +195,9 @@ public class DatabaseQueryController {
                 "    mainImageUrl TEXT,\n" +
                 "    backgroundImageUrl TEXT,\n" +
                 "    about TEXT,\n" +
-                "    currentJobId INTEGER,\n" +
-                "    educationalInfoId INTEGER,\n" +
                 "    country TEXT,\n" +
                 "    city TEXT,\n" +
                 "    profession TEXT,\n" +
-                "    contactInfoId INTEGER,\n" +
                 "    jobStatus TEXT,\n" +
                 "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
@@ -120,7 +213,7 @@ public class DatabaseQueryController {
                 "    expiryDate TEXT,\n" +
                 "    certificateId TEXT,\n" +
                 "    certificateURL TEXT,\n" +
-                "    relatedSkills INTEGER , -- Enum values stored as integers\n" +
+                "    relatedSkills INTEGER ,\n" +
                 "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
@@ -294,13 +387,13 @@ public class DatabaseQueryController {
         }
         return Messages.SUCCESS;
     }
-//    public static Messages addProfileToDatabase(Profile profile, int userId) {
-//
-//    }
+    //    public static Messages addProfileToDatabase(Profile profile, int userId) {
+    //
+    //    }
     public static void insertProfile(Profile profile, int userId) throws SQLException {
         String sql = "INSERT INTO Profile (userId) VALUES (?)";
         try (Connection conn = DbController.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             conn.setAutoCommit(true);
             pstmt.setInt(1, userId);
             pstmt.executeUpdate();
@@ -311,10 +404,16 @@ public class DatabaseQueryController {
                 if (generatedKeys.next()) {
                     int profileId = generatedKeys.getInt(1);
 
-                    for (ProfileJob job : profile.getProfileJobList()) {
-                        int returnedId = insertProfileJob(job, profileId);;
+                    ProfileExperience experience = profile.getProfileExperience();
+                    for (ProfileJob job : experience.getJobs()) {
+                        int returnedId = insertProfileJob(job, profileId);
                         if (returnedId != -1) currentProfileJobId = returnedId;
                     }
+                    for (ProfileVoluntaryActivities activity : experience.getVoluntaryActivities()) {
+                        insertProfileVoluntaryActivity(activity, profileId);
+                    }
+                    insertProfileExperience(experience, profileId);
+
                     for (ProfileEducation education : profile.getProfileEducationList()) {
                         int returnedId = insertProfileEducation(education, profileId);
                         if (returnedId != -1) currentProfileEducationId = returnedId;
@@ -323,15 +422,17 @@ public class DatabaseQueryController {
                         insertCertificate(certificate, profileId);
                     }
                     int contactInfoId = insertProfileContactInfo(profile.getHeader().getContactInfo(), profileId);
-                    insertProfileHeader(profile.getHeader(), profileId, contactInfoId, currentProfileJobId, currentProfileJobId);
+                    insertProfileHeader(profile.getHeader(), profileId, contactInfoId, currentProfileJobId, currentProfileEducationId);
+
+                    insertProfileSkill(profile.getSkills(), profileId);
+                    insertOrganizationCooperate(profile.getOrganizations(), profileId);
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return;
         }
     }
+
     public static void insertProfileHeader(ProfileHeader header, int profileId, int contactInfoId, int currentProfileJobId, int currentProfileEducationId) throws SQLException {
         String sql = "INSERT INTO ProfileHeader (specifiedProfileId, firstName, lastName, additionalName, mainImageUrl, backgroundImageUrl, about, currentJobId, educationalInfoId, country, city, profession, contactInfoId, jobStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -352,12 +453,12 @@ public class DatabaseQueryController {
             pstmt.setInt(13, contactInfoId);
             pstmt.setString(14, header.getJobStatus());
             pstmt.executeUpdate();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return;
         }
     }
+
     public static int insertProfileJob(ProfileJob job, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileJob (specifiedProfileId, title, jobStatus, companyName, workplaceLocation, jobWorkplaceStatus, companyActivityStatus, startDate, endDate, currentlyWorking, description, jobSkills, informOthersForTheProfileUpdate, isCurrentJob) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -380,7 +481,7 @@ public class DatabaseQueryController {
             pstmt.executeUpdate();
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    if(job.getIsCurrentProfileJob())
+                    if (job.getIsCurrentProfileJob())
                         return generatedKeys.getInt(1);
                     else
                         return -1;
@@ -388,12 +489,12 @@ public class DatabaseQueryController {
                     throw new SQLException("Creating profile job failed, no ID obtained.");
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
     }
+
     public static int insertProfileEducation(ProfileEducation education, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileEducation (specifiedProfileId, instituteName, educationStartDate, educationEndDate, stillOnEducation, GPA, descriptionOfActivitiesAndAssociations, description, educationalSkills, informOthersForTheProfileUpdate, isCurrentEducation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -418,15 +519,15 @@ public class DatabaseQueryController {
                     else
                         return -1;
                 } else {
-                    throw new SQLException("Creating profile job failed, no ID obtained.");
+                    throw new SQLException("Creating profile education failed, no ID obtained.");
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
     }
+
     public static void insertCertificate(Certificate certificate, int profileId) throws SQLException {
         String sql = "INSERT INTO Certificate (specifiedProfileId, name, organizationName, issueDate, expiryDate, certificateId, certificateURL, relatedSkills) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -445,14 +546,14 @@ public class DatabaseQueryController {
                 if (generatedKeys.next()) {
                     generatedKeys.getInt(1);
                 } else {
-                    throw new SQLException("Creating profile job failed, no ID obtained.");
+                    throw new SQLException("Creating certificate failed, no ID obtained.");
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public static int insertProfileContactInfo(ProfileContactInfo contactInfo, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileContactInfo (specifiedProfileHeaderId, linkUrl, emailAddress, phoneNumber, phoneType, address, dateOfBirth, showBirthDateTo, otherContactInfo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -462,7 +563,7 @@ public class DatabaseQueryController {
             pstmt.setString(2, contactInfo.getLinkUrl());
             pstmt.setString(3, contactInfo.getEmailAddress());
             pstmt.setString(4, contactInfo.getPhoneNumber());
-            pstmt.setString(5, contactInfo.getPhoneType().toString());
+            pstmt.setString(5, contactInfo.getPhoneType().getValue());
             pstmt.setString(6, contactInfo.getAddress());
             pstmt.setString(7, contactInfo.getDateOfBirth().toString());
             pstmt.setString(8, contactInfo.getShowBirthDateTo().toString());
@@ -470,13 +571,143 @@ public class DatabaseQueryController {
             pstmt.executeUpdate();
             try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // return the id of the inserted profile job
+                    return generatedKeys.getInt(1);
                 } else {
-                    throw new SQLException("Creating profile job failed, no ID obtained.");
+                    throw new SQLException("Creating profile contact info failed, no ID obtained.");
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static void insertComment(int postId, int commenterId, String commentText) throws SQLException {
+        String sql = "INSERT INTO Comments (postId, commenterId, commentText) VALUES (?, ?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, postId);
+            pstmt.setInt(2, commenterId);
+            pstmt.setString(3, commentText);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertLike(int postId, int likerId) throws SQLException {
+        String sql = "INSERT INTO Likes (postId, likerId) VALUES (?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, postId);
+            pstmt.setInt(2, likerId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertPost(String caption, int userId) throws SQLException {
+        String sql = "INSERT INTO Posts (caption, identification) VALUES (?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            conn.setAutoCommit(true);
+            pstmt.setString(1, caption);
+            pstmt.setInt(2, userId);
+            pstmt.executeUpdate();
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating post failed, no ID obtained.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertConnection(int senderProfileId, int receiverProfileId, String connectionStatus, String requestSentDate) throws SQLException {
+        String sql = "INSERT INTO Connections (senderSpecifiedProfileId, receiverSpecifiedProfileId, connectionStatus, requestSentDate) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, senderProfileId);
+            pstmt.setInt(2, receiverProfileId);
+            pstmt.setString(3, connectionStatus);
+            pstmt.setString(4, requestSentDate);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertProfileExperience(ProfileExperience experience, int profileId) throws SQLException {
+        String sql = "INSERT INTO ProfileExperience (specifiedProfileId, militaryService, militaryServiceDate, ceoExperience, ceoExperienceDate) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, profileId);
+            pstmt.setString(2, experience.getMilitaryService());
+            pstmt.setString(3, experience.getMilitaryServiceDate().toString());
+            pstmt.setString(4, experience.getCeoExperience());
+            pstmt.setString(5, experience.getCeoExperienceDate().toString());
+            pstmt.executeUpdate();
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating profile experience failed, no ID obtained.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertProfileSkill(ProfileSkills skill, int profileId) throws SQLException {
+        String sql = "INSERT INTO ProfileSkills (specifiedProfileId, jobSkills) VALUES (?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, profileId);
+            pstmt.setString(2, String.join((CharSequence) ",", (CharSequence) skill.getJobSkills()));
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertOrganizationCooperate(OrganizationCooperate org, int profileId) throws SQLException {
+        String sql = "INSERT INTO OrganizationCooperate (specifiedProfileId, organizationName, positionInOrganization, startCooperateDate, endCooperateDate, isActive) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, profileId);
+            pstmt.setString(2, org.getOrganizationName());
+            pstmt.setString(3, org.getPositionInOrganization());
+            pstmt.setString(4, org.getStartCooperateDate().toString());
+            pstmt.setString(5, org.getEndCooperateDate().toString());
+            pstmt.setInt(6, org.getIsActive() ? 1 : 0);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void insertProfileVoluntaryActivity(ProfileVoluntaryActivities activity, int experienceId) throws SQLException {
+        String sql = "INSERT INTO ProfileVoluntaryActivities (specifiedProfileExperienceId, desc, date) VALUES (?, ?, ?)";
+        try (Connection conn = DbController.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(true);
+            pstmt.setInt(1, experienceId);
+            pstmt.setString(2, activity.getDesc());
+            pstmt.setString(3, activity.getDate().toString());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

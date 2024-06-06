@@ -1,16 +1,16 @@
-package Model;
+package Model.Response;
 
+import Model.*;
 import com.google.gson.annotations.SerializedName;
 import lombok.*;
 
 import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Profile {
+public class ProfileResponse {
     @SerializedName("ProfileExperiences")
     private ProfileExperience profileExperience;
     @SerializedName("ProfileEducationList")
@@ -22,5 +22,9 @@ public class Profile {
     @SerializedName("ProfileSkills")
     private ProfileSkills skills;
     @SerializedName("ProfileOrganizations")
-    private OrganizationCooperate organizations;
+    private ProfileOrganizations organizations;
+    @SerializedName("ProfileIdentificationCode")
+    private String identificationCode;
+    @SerializedName("ProfileFeed")
+    private Feed feed;
 }

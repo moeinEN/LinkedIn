@@ -14,5 +14,5 @@ public class OrganizationCooperate {
     private String positionInOrganization;
     private Date startCooperateDate;
     private Date endCooperateDate;
-    private boolean isActive;
+    private Boolean isActive;
 }
