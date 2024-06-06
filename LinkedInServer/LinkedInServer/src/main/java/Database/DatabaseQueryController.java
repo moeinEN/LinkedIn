@@ -51,7 +51,7 @@ public class DatabaseQueryController {
                 "    jobSkills TEXT,\n" +
                 "    informOthersForTheProfileUpdate INTEGER\n" +
                 "    isCurrentJob INTEGER,\n" +
-                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id),\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -69,7 +69,7 @@ public class DatabaseQueryController {
                 "    educationalSkills TEXT,\n" +
                 "    informOthersForTheProfileUpdate INTEGER\n" +
                 "    isCurrentEducation INTEGER,\n" +
-                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id),\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -84,8 +84,8 @@ public class DatabaseQueryController {
                 "    address TEXT,\n" +
                 "    dateOfBirth TEXT,\n" +
                 "    showBirthDateTo TEXT,\n" +
-                "    otherContactInfo TEXT\n" +
-                "    FOREIGN KEY (specifiedProfileHeaderId) REFERENCES ProfileHeader(id),\n" +
+                "    otherContactInfo TEXT,\n" +
+                "    FOREIGN KEY (specifiedProfileHeaderId) REFERENCES ProfileHeader(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -106,7 +106,7 @@ public class DatabaseQueryController {
                 "    profession TEXT,\n" +
                 "    contactInfoId INTEGER,\n" +
                 "    jobStatus TEXT,\n" +
-                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id),\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -120,8 +120,8 @@ public class DatabaseQueryController {
                 "    expiryDate TEXT,\n" +
                 "    certificateId TEXT,\n" +
                 "    certificateURL TEXT,\n" +
-                "    relatedSkills INTEGER -- Enum values stored as integers\n" +
-                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id),\n" +
+                "    relatedSkills INTEGER , -- Enum values stored as integers\n" +
+                "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -138,7 +138,7 @@ public class DatabaseQueryController {
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    token VARCHAR(255) UNIQUE,\n" +
                 "    user_id INTEGER,\n" +
-                "    expire_status VARCHAR(255),\n" +
+                "    expire_status VARCHAR(255)\n" +
                 ");";
         createTable(sql);
     }

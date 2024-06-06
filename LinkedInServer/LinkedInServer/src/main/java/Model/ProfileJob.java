@@ -24,7 +24,7 @@ public class ProfileJob {
     private String description;
     private List<JobSkills> jobSkills;
     private Boolean informOthersForTheProfileUpdate;
-    private Boolean isCurrentProfileJob;
+    private Boolean isCurrentProfileJob; //true for profile header
 
     List<String> invalidFields = new ArrayList<>();
 
