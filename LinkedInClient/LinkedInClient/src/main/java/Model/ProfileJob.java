@@ -24,5 +24,5 @@ public class ProfileJob {
     private String description;
     private List<JobSkills> jobSkills;
     private boolean informOthersForTheProfileUpdate;
-    private boolean isCurrentProfileJob;
+    private boolean isCurrentProfileJob; //true for profile header
 }

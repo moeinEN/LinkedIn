@@ -11,12 +11,16 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class Profile {
-    @SerializedName("ProfileJobList")
-    private List<ProfileJob> profileJobList;
+    @SerializedName("ProfileExperiences")
+    private ProfileExperience profileExperience;
     @SerializedName("ProfileEducationList")
     private List<ProfileEducation> profileEducationList;
     @SerializedName("CertificatesList")
     private List<Certificate> certificatesList;
     @SerializedName("ProfileHeader")
     private ProfileHeader header;
+    @SerializedName("ProfileSkills")
+    private ProfileSkills skills;
+    @SerializedName("ProfileOrganizations")
+    private ProfileOrganizations organizations;
 }

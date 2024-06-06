@@ -3,6 +3,7 @@ import Controller.SignUpController;
 import Model.Cookies;
 import Model.LoginCredentials;
 import Model.Messages;
+import Model.Profile;
 
 public class Main {
     public static void main(String[] args) {
@@ -30,5 +31,8 @@ public class Main {
         LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
         Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
         System.out.println(Cookies.getSessionToken());
+
+
+        Profile profile = new Profile();
     }
 }
