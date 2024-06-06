@@ -1,13 +1,12 @@
 package Service;
 
-import Model.LoginCredentials;
-import Model.Profile;
-import Model.RegisterCredentials;
+import Model.Requests.LoginCredentials;
+import Model.Requests.CreateProfileRequest;
+import Model.Requests.RegisterCredentials;
 import Model.User;
 import com.google.gson.JsonObject;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.http.*;
 
 import java.util.List;
@@ -37,5 +36,5 @@ public interface UserService {
     Call<ResponseBody> login(@Body LoginCredentials loginCredentials);
 
     @POST("/user/profile")
-    Call<ResponseBody> profile(@Body Profile profile, @Header("sessionToken") String sessionToken);
+    Call<ResponseBody> profile(@Body CreateProfileRequest profile, @Header("sessionToken") String sessionToken);
 }

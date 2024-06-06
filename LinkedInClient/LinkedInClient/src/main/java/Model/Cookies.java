@@ -7,11 +7,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
 public class Cookies {
     private static String sessionToken;
-
+    private static String profileIdentification;
 
     public static void setSessionToken(String sessionToken) {
         Cookies.sessionToken = sessionToken;
@@ -19,5 +17,13 @@ public class Cookies {
 
     public static String getSessionToken() {
         return sessionToken;
+    }
+
+    public static String getProfileIdentification() {
+        return profileIdentification;
+    }
+
+    public static void setProfileIdentification(String profileIdentification) {
+        Cookies.profileIdentification = profileIdentification;
     }
 }

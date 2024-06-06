@@ -1,4 +1,4 @@
-package Model;
+package Model.Requests;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.*;
