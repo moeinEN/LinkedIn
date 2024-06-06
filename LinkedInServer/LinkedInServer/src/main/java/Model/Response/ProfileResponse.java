@@ -22,7 +22,7 @@ public class ProfileResponse {
     @SerializedName("ProfileSkills")
     private ProfileSkills skills;
     @SerializedName("ProfileOrganizations")
-    private OrganizationCooperate organizations;
+    private ProfileOrganizations organizations;
     @SerializedName("ProfileIdentificationCode")
     private String identificationCode;
     @SerializedName("ProfileFeed")

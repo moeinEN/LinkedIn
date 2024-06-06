@@ -22,5 +22,5 @@ public class Profile {
     @SerializedName("ProfileSkills")
     private ProfileSkills skills;
     @SerializedName("ProfileOrganizations")
-    private OrganizationCooperate organizations;
+    private ProfileOrganizations organizations;
 }

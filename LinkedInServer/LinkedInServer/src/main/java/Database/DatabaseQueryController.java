@@ -679,17 +679,17 @@ public class DatabaseQueryController {
         }
     }
 
-    public static void insertOrganizationCooperate(OrganizationCooperate org, int profileId) throws SQLException {
+    public static void insertOrganizationCooperate(ProfileOrganizations org, int profileId) throws SQLException {
         String sql = "INSERT INTO OrganizationCooperate (specifiedProfileId, organizationName, positionInOrganization, startCooperateDate, endCooperateDate, isActive) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             conn.setAutoCommit(true);
             pstmt.setInt(1, profileId);
             pstmt.setString(2, org.getOrganizationName());
-            pstmt.setString(3, org.getPositionInOrganization());
-            pstmt.setString(4, org.getStartCooperateDate().toString());
-            pstmt.setString(5, org.getEndCooperateDate().toString());
-            pstmt.setInt(6, org.getIsActive() ? 1 : 0);
+            pstmt.setString(3, org.getPosition());
+            pstmt.setString(4, org.getStartDate().toString());
+            pstmt.setString(5, org.getEndDate().toString());
+            pstmt.setInt(6, org.getCurrentlyWorking() ? 1 : 0);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
