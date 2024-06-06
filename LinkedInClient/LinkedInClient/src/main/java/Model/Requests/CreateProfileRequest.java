@@ -1,5 +1,6 @@
-package Model;
+package Model.Requests;
 
+import Model.*;
 import com.google.gson.annotations.SerializedName;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Profile {
+public class CreateProfileRequest {
     @SerializedName("ProfileExperiences")
     private ProfileExperience profileExperience;
     @SerializedName("ProfileEducationList")

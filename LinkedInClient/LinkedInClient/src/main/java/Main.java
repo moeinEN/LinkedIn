@@ -1,9 +1,8 @@
 import Controller.RetrofitBuilder;
-import Controller.SignUpController;
 import Model.Cookies;
-import Model.LoginCredentials;
+import Model.Requests.LoginCredentials;
 import Model.Messages;
-import Model.Profile;
+import Model.Requests.CreateProfileRequest;
 
 public class Main {
     public static void main(String[] args) {
@@ -33,6 +32,6 @@ public class Main {
         System.out.println(Cookies.getSessionToken());
 
 
-        Profile profile = new Profile();
+        CreateProfileRequest profile = new CreateProfileRequest();
     }
 }

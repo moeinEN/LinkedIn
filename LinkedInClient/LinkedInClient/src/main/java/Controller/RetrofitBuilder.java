@@ -2,21 +2,20 @@ package Controller;
 
 
 import Model.*;
+import Model.Requests.LoginCredentials;
+import Model.Requests.CreateProfileRequest;
+import Model.Requests.RegisterCredentials;
+import Model.User;
 import Service.UserService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import java.io.IOException;
-
-import static Model.Messages.USER_LOGGED_IN_SUCCESSFULLY;
 
 public class RetrofitBuilder {
 
@@ -128,7 +127,7 @@ public class RetrofitBuilder {
         return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
 
-    public HttpStatus syncCallProfile(Profile profile){
+    public HttpStatus syncCallProfile(CreateProfileRequest profile){
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callProfile = service.profile(profile, Cookies.getSessionToken());
         HttpStatus ServerResponse;
