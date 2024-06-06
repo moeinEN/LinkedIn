@@ -23,5 +23,5 @@ public class CreateProfileRequest {
     @SerializedName("ProfileSkills")
     private ProfileSkills skills;
     @SerializedName("ProfileOrganizations")
-    private ProfileOrganizations organizations;
+    private OrganizationCooperate organizations;
 }
