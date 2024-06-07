@@ -2,8 +2,7 @@ package Model;
 
 import lombok.*;
 
-import java.sql.Date;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -26,3 +25,4 @@ public class ProfileJob {
     private Boolean informOthersForTheProfileUpdate;
     private Boolean isCurrentProfileJob; //true for profile header
 }
+

@@ -164,7 +164,6 @@ public class RequestHandler {
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(response);
                     }
-                    return;
                 }
             } else {
                 byte[] response = Messages.UNAUTHORIZED.toByte("UTF-8");
@@ -172,7 +171,6 @@ public class RequestHandler {
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response);
                 }
-                return;
             }
 
             try (InputStream requestBody = exchange.getRequestBody();
@@ -208,6 +206,7 @@ public class RequestHandler {
                 }
             }
             catch (Exception e) {
+                e.printStackTrace();
                 byte[] response = BAD_REQUEST.toByte("UTF-8");
                 exchange.sendResponseHeaders(BAD_REQUEST.getStatusCode(), response.length);
                 try (OutputStream os = exchange.getResponseBody()) {

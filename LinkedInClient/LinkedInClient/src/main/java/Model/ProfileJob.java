@@ -2,8 +2,7 @@ package Model;
 
 import lombok.*;
 
-import java.sql.Date;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -17,12 +16,13 @@ public class ProfileJob {
     private String companyName;
     private String workplaceLocation;
     private JobWorkplaceStatus jobWorkplaceStatus;
-    private boolean companyActivityStatus; //TODO وضعیت فعالیت در شرکت
+    private Boolean companyActivityStatus; //TODO وضعیت فعالیت در شرکت
     private Date startDate;
     private Date endDate;
-    private boolean currentlyWorking;
+    private Boolean currentlyWorking;
     private String description;
     private List<JobSkills> jobSkills;
-    private boolean informOthersForTheProfileUpdate;
-    private boolean isCurrentProfileJob; //true for profile header
+    private Boolean informOthersForTheProfileUpdate;
+    private Boolean isCurrentProfileJob; //true for profile header
 }
+

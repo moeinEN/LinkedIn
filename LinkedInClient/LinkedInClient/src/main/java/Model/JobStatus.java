@@ -1,5 +1,8 @@
 package Model;
 
+import lombok.Getter;
+
+@Getter
 public enum JobStatus {
     FULL_TIME("Full-time"),
     PART_TIME("Part-time"),

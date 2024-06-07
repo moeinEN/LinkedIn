@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class    Certificate {
+public class Certificate {
     private String name;
     private String organizationName;
     private Date issueDate;

@@ -24,7 +24,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         //DatabaseQueryController.createTableUsers();
 
-        // Create HTTP server listening on port 8080
+        //Create HTTP server listening on port 8080
         createTableProfile();
         createTableProfileJob();
         createTableProfileHeader();
@@ -40,7 +40,7 @@ public class Main {
         createTableProfileExperience();
         createTableProfileSkills();
         createTableProfileOrganizations();
-
+//
 
 
 

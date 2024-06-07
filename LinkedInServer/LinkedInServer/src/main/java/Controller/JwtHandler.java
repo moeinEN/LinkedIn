@@ -9,6 +9,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Date;
 
@@ -63,7 +64,7 @@ public class JwtHandler {
             return Messages.INVALID_TOKEN;
         }
 
-        if(!checkExpiryDate(claims.getExpiration())) {
+        if(checkExpiryDate(claims.getExpiration())) {
             return Messages.SESSION_EXPIRED;
         }
 
@@ -77,13 +78,14 @@ public class JwtHandler {
         return Messages.SUCCESS;
     }
 
-    public static int getUserIdFromJwtToken(String jwt) throws IllegalArgumentException {
+    public static int getUserIdFromJwtToken(String jwt) throws IllegalArgumentException, SQLException {
         Claims claims = decodeJwtToken(jwt);
-        return Integer.parseInt(claims.get("userId", String.class));
+        String username = claims.get("username", String.class);
+        return DatabaseQueryController.getUserId(username);
     }
 
     public static boolean checkExpiryDate(Date expiryDate) {
-        Date now = new Date();
+        Date now = new Date(System.currentTimeMillis());
         return expiryDate.before(now);
     }
 }

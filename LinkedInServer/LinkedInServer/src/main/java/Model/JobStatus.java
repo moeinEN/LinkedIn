@@ -1,5 +1,8 @@
 package Model;
 
+import lombok.Getter;
+
+@Getter
 public enum JobStatus {
     FULL_TIME("Full-time"),
     PART_TIME("Part-time"),
@@ -13,9 +16,5 @@ public enum JobStatus {
     private String value;
     private JobStatus(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 }
