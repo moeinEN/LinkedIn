@@ -2,6 +2,7 @@ package Database;
 
 import Model.*;
 import Model.Requests.CommentRequest;
+import Model.Response.WatchConnectionPendingLists;
 
 import java.sql.*;
 import java.util.Objects;
@@ -257,6 +258,7 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+
     public static User getUser(String username) throws SQLException {
         String sql = String.format("SELECT * FROM USER WHERE username = '%s';", username);
         Connection db = null;
@@ -409,6 +411,7 @@ public class DatabaseQueryController {
         }
         return Messages.SUCCESS;
     }
+
     public static void insertProfile(Profile profile, int userId) throws SQLException {
         String sql = "INSERT INTO Profile (userId) VALUES (?)";
 
@@ -784,4 +787,76 @@ public class DatabaseQueryController {
             e.printStackTrace();
             throw e;
         }
-    }}
+    }
+
+    public static MiniProfile getUserMiniProfile(int userId) throws SQLException {
+        String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String imageUrl = rs.getString("imageUrl");
+            return new MiniProfile(firstName, lastName, imageUrl, userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+        return null;
+    }
+
+    public static WatchConnectionPendingLists selectPendingConnects(int receiverId) throws SQLException {
+        String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, receiverId);
+            ResultSet rs = pstmt.executeQuery();
+            WatchConnectionPendingLists watchConnectionPendingLists = new WatchConnectionPendingLists();
+            while (rs.next()) {
+                int senderId = rs.getInt("specifiedSenderId");
+                MiniProfile miniProfile = getUserMiniProfile(senderId);
+                if (Objects.nonNull(miniProfile)) {
+                    watchConnectionPendingLists.getPendingLists().put(miniProfile, miniProfile.getFirstName() + " " + miniProfile.getLastName());
+                }
+            }
+            return watchConnectionPendingLists;
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+        return new WatchConnectionPendingLists();
+    }
+
+    public static void acceptOrDeclineConnection(int senderId, int receiverId, boolean connect) throws SQLException {
+        String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            if (connect){
+                addConnectionToUser(conn, senderId, receiverId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+    }
+
+    public static void addConnectionToUser(Connection conn, int senderId, int receiverId) throws SQLException {
+        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+}
