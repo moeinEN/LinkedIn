@@ -884,7 +884,7 @@ public class DatabaseQueryController {
                 JobStatus jobStatus = JobStatus.valueOf(rs.getString("jobStatus"));
                 String companyName = rs.getString("companyName");
                 String workplaceLocation = rs.getString("workplaceLocation");
-                String jobWorkplaceStatus = rs.getString("jobWorkplaceStatus");
+                JobWorkplaceStatus jobWorkplaceStatus = JobWorkplaceStatus.valueOf(rs.getString("jobWorkplaceStatus"));
                 Boolean companyActivityStatus = rs.getBoolean("companyActivityStatus");
                 Date startDate = Date.valueOf(rs.getString("startDate"));
                 Date endDate = Date.valueOf(rs.getString("endDate"));
@@ -922,7 +922,7 @@ public class DatabaseQueryController {
         catch (Exception e) {
             e.printStackTrace();
         }
-        return null
+        return null;
 
     }
 
