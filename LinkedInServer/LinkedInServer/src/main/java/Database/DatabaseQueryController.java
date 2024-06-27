@@ -207,7 +207,7 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void createTablePost(Connection conn) throws SQLException {
+    public static void createTablePost() throws SQLException {
         String sql = "CREATE TABLE POST (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedUserId INTEGER,\n" +
@@ -216,7 +216,7 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void createTableComment(Connection conn) throws SQLException {
+    public static void createTableComment() throws SQLException {
         String sql = "CREATE TABLE Comment (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedUserId INTEGER,\n" +
@@ -227,13 +227,33 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void createTableLike(Connection conn) throws SQLException {
+    public static void createTableLike() throws SQLException {
         String sql = "CREATE TABLE Like (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedUserId INTEGER,\n" +
                 "    specifiedPostId INTEGER,\n" +
                 "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id),\n" +
                 "    FOREIGN KEY (specifiedPostId) REFERENCES POST(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableConnect() throws SQLException {
+        String sql = "CREATE TABLE Connect (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedSenderId INTEGER,\n" +
+                "    specifiedReceiverId INTEGER,\n" +
+                "    FOREIGN KEY (specifiedSenderId) REFERENCES USER(id),\n" +
+                "    FOREIGN KEY (specifiedReceiverId) REFERENCES USER(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTablePendingConnect() throws SQLException {
+        String sql = "CREATE TABLE Pending (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedSenderId INTEGER,\n" +
+                "    specifiedReceiverId INTEGER,\n" +
+                "    FOREIGN KEY (specifiedSenderId) REFERENCES USER(id),\n" +
+                "    FOREIGN KEY (specifiedReceiverId) REFERENCES USER(id)\n" +
                 ");";
         createTable(sql);
     }
@@ -731,4 +751,37 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-}
+
+    public static void insertPendingConnect(int senderId, int receiverId) throws SQLException {
+        String sql = "INSERT INTO Pending (specifiedSenderId, specifiedReceiverId) VALUES (?, ?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void insertConnect(int senderId, int receiverId) throws SQLException {
+        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }}

@@ -2,9 +2,7 @@ package Controller;
 
 
 import Model.*;
-import Model.Requests.LoginCredentials;
-import Model.Requests.CreateProfileRequest;
-import Model.Requests.RegisterCredentials;
+import Model.Requests.*;
 import Model.User;
 import Service.UserService;
 import com.google.gson.Gson;
@@ -20,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitBuilder {
 
     private static final String BASE_URL = "http://localhost:8080";
-
+    private Retrofit retrofit = retrofitBuilder();
 
     private Retrofit retrofitBuilder(){
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
@@ -34,7 +32,6 @@ public class RetrofitBuilder {
                 .build();
         return retrofit;
     }
-    private Retrofit retrofit = retrofitBuilder();
 
     private User syncCallGetUserService(String username){
         Retrofit retrofit = this.retrofitBuilder();
@@ -144,4 +141,41 @@ public class RetrofitBuilder {
             return Messages.INTERNAL_ERROR;
         }
     }
+
+    public Messages syncCallLike(LikeRequest like) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callLike = service.like(like, Cookies.getSessionToken());
+        Messages ServerResponse;
+        try {
+            Response<ResponseBody> response = callLike.execute();
+            byte[] responseBodeBytes = response.body().bytes();
+            Gson gson = new Gson();
+            ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
+
+            return ServerResponse;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
+    public Messages syncCallComment(CommentRequest comment) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callLike = service.comment(comment, Cookies.getSessionToken());
+        Messages ServerResponse;
+        try {
+            Response<ResponseBody> response = callLike.execute();
+            byte[] responseBodeBytes = response.body().bytes();
+            Gson gson = new Gson();
+            ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
+
+            return ServerResponse;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
 }
