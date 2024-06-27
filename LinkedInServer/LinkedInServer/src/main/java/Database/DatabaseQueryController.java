@@ -253,6 +253,7 @@ public class DatabaseQueryController {
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedSenderId INTEGER,\n" +
                 "    specifiedReceiverId INTEGER,\n" +
+                "    note TEXT,\n" +
                 "    FOREIGN KEY (specifiedSenderId) REFERENCES USER(id),\n" +
                 "    FOREIGN KEY (specifiedReceiverId) REFERENCES USER(id)\n" +
                 ");";
@@ -772,14 +773,15 @@ public class DatabaseQueryController {
         }
     }
 
-    public static void insertConnect(int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?, ?)";
+    public static void insertConnect(int senderId, int receiverId, String note) throws SQLException {
+        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId, note) VALUES (?, ?, ?)";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
+            pstmt.setString(3, note);
             pstmt.executeUpdate();
             conn.commit();
         }
