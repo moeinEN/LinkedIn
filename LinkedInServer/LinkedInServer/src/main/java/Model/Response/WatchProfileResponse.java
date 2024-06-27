@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ProfileResponse {
+public class WatchProfileResponse {
     @SerializedName("ProfileExperiences")
     private ProfileExperience profileExperience;
     @SerializedName("ProfileEducationList")

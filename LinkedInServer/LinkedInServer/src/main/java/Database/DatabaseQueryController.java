@@ -2,6 +2,8 @@ package Database;
 
 import Model.*;
 import Model.Requests.CommentRequest;
+import Model.Requests.WatchConnectionListRequest;
+import Model.Requests.WatchProfileRequest;
 import Model.Response.WatchConnectionPendingLists;
 
 import java.sql.*;
@@ -791,26 +793,26 @@ public class DatabaseQueryController {
         }
     }
 
-    public static MiniProfile getUserMiniProfile(int userId) throws SQLException {
+    public static MiniProfile getUserMiniProfile(int profileId) throws SQLException {
         String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, userId);
+            pstmt.setInt(1, profileId);
             ResultSet rs = pstmt.executeQuery();
             String firstName = rs.getString("firstName");
             String lastName = rs.getString("lastName");
             String imageUrl = rs.getString("imageUrl");
-            return new MiniProfile(firstName, lastName, imageUrl, userId);
+            return new MiniProfile(firstName, lastName, imageUrl, profileId);
         } catch (Exception e) {
             e.printStackTrace();
-            conn.rollback();
         }
         return null;
     }
 
-    public static WatchConnectionPendingLists selectPendingConnects(int receiverId) throws SQLException {
+    public static WatchConnectionPendingLists selectPendingConnects(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
         String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
+        int receiverId = watchConnectionListRequest.getMyProfileId();
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -830,6 +832,11 @@ public class DatabaseQueryController {
             conn.rollback();
         }
         return new WatchConnectionPendingLists();
+    }
+
+    public static WatchProfileRequest watchProfileRequest(WatchProfileRequest watchProfileRequest){
+
+        return null;
     }
 
     public static void acceptOrDeclineConnection(int senderId, int receiverId, boolean connect) throws SQLException {
