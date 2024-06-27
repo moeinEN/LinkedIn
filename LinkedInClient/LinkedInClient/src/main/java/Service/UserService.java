@@ -26,9 +26,6 @@ public interface UserService {
     @GET("/users/{username}")
     public Call<User> getUser(@Path("username") String username);
 
-
-
-
     @POST("/user/register")
     Call<ResponseBody> signUp(@Body RegisterCredentials registerCredentials);
 
@@ -37,4 +34,7 @@ public interface UserService {
 
     @POST("/user/profile")
     Call<ResponseBody> profile(@Body CreateProfileRequest profile, @Header("sessionToken") String sessionToken);
+
+
+
 }

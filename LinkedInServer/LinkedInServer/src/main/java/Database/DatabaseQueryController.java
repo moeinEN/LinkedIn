@@ -1,6 +1,7 @@
 package Database;
 
 import Model.*;
+import Model.Requests.CommentRequest;
 
 import java.sql.*;
 import java.util.Objects;
@@ -32,36 +33,6 @@ public class DatabaseQueryController {
                 "    username VARCHAR(255) UNIQUE,\n" +
                 "    password VARCHAR(255),\n" +
                 "    email VARCHAR(255) UNIQUE\n" +
-                ");";
-        createTable(sql);
-    }
-    public static void createTableComments() throws SQLException {
-        String sql = "CREATE TABLE Comments (\n" +
-                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "    postId INTEGER,\n" +
-                "    commenterId INTEGER,\n" +
-                "    commentText TEXT,\n" +
-                "    FOREIGN KEY (postId) REFERENCES Post(id),\n" +
-                "    FOREIGN KEY (commenterId) REFERENCES USER(id)\n" + /*user or profile id??*/
-                ");";
-        createTable(sql);
-    }
-    public static void createTableLikes() throws SQLException {
-        String sql = "CREATE TABLE Likes (\n" +
-                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "    postId INTEGER,\n" +
-                "    likerId INTEGER,\n" +
-                "    FOREIGN KEY (postId) REFERENCES Post(id),\n" +
-                "    FOREIGN KEY (likerId) REFERENCES USER(id)\n" + /*user or profile id??*/
-                ");";
-        createTable(sql);
-    }
-    public static void createTablePosts() throws SQLException {
-        String sql = "CREATE TABLE Posts (\n" +
-                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "    caption TEXT,\n" +
-                "    identification INTEGER,\n" +
-                "    FOREIGN KEY (identification) REFERENCES USER(id)\n" + /*user or profile id??*/
                 ");";
         createTable(sql);
     }
@@ -236,6 +207,36 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+    public static void createTablePost(Connection conn) throws SQLException {
+        String sql = "CREATE TABLE POST (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedUserId INTEGER,\n" +
+                "    caption TEXT,\n" +
+                "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableComment(Connection conn) throws SQLException {
+        String sql = "CREATE TABLE Comment (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedUserId INTEGER,\n" +
+                "    specifiedPostId INTEGER,\n" +
+                "    comment TEXT,\n" +
+                "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id),\n" +
+                "    FOREIGN KEY (specifiedPostId) REFERENCES POST(id)\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void createTableLike(Connection conn) throws SQLException {
+        String sql = "CREATE TABLE Like (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedUserId INTEGER,\n" +
+                "    specifiedPostId INTEGER,\n" +
+                "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id),\n" +
+                "    FOREIGN KEY (specifiedPostId) REFERENCES POST(id)\n" +
+                ");";
+        createTable(sql);
+    }
     public static User getUser(String username) throws SQLException {
         String sql = String.format("SELECT * FROM USER WHERE username = '%s';", username);
         Connection db = null;
@@ -388,9 +389,6 @@ public class DatabaseQueryController {
         }
         return Messages.SUCCESS;
     }
-    //    public static Messages addProfileToDatabase(Profile profile, int userId) {
-    //
-    //    }
     public static void insertProfile(Profile profile, int userId) throws SQLException {
         String sql = "INSERT INTO Profile (userId) VALUES (?)";
 
@@ -596,53 +594,6 @@ public class DatabaseQueryController {
         }
     }
 
-    public static void insertComment(int postId, int commenterId, String commentText) throws SQLException {
-        String sql = "INSERT INTO Comments (postId, commenterId, commentText) VALUES (?, ?, ?)";
-        try (Connection conn = DbController.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(true);
-            pstmt.setInt(1, postId);
-            pstmt.setInt(2, commenterId);
-            pstmt.setString(3, commentText);
-            pstmt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void insertLike(int postId, int likerId) throws SQLException {
-        String sql = "INSERT INTO Likes (postId, likerId) VALUES (?, ?)";
-        try (Connection conn = DbController.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(true);
-            pstmt.setInt(1, postId);
-            pstmt.setInt(2, likerId);
-            pstmt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void insertPost(String caption, int userId) throws SQLException {
-        String sql = "INSERT INTO Posts (caption, identification) VALUES (?, ?)";
-        try (Connection conn = DbController.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            conn.setAutoCommit(true);
-            pstmt.setString(1, caption);
-            pstmt.setInt(2, userId);
-            pstmt.executeUpdate();
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("Creating post failed, no ID obtained.");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void insertConnection(int senderProfileId, int receiverProfileId, String connectionStatus, String requestSentDate) throws SQLException {
         String sql = "INSERT INTO Connections (senderSpecifiedProfileId, receiverSpecifiedProfileId, connectionStatus, requestSentDate) VALUES (?, ?, ?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -730,4 +681,54 @@ public class DatabaseQueryController {
         }
     }
 
+    public static void insertPost(Post post, int userId) throws SQLException {
+        String sql = "INSERT INTO POST (specifiedUserId, caption) VALUES (?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, post.getText());
+            pstmt.executeUpdate();
+            conn.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void insertComment(CommentRequest comment, int userId) throws SQLException {
+        String sql = "INSERT INTO COMMENT (specifiedUserId, specifiedPostId, comment) VALUES (?, ?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, comment.getPostIdentification());
+            pstmt.setString(3, comment.getComment());
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    public static void insertLike(int postId, int userId) throws SQLException {
+        String sql = "INSERT INTO LIKE (specifiedUserId, specifiedPostId) VALUES (?, ?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, postId);
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 }
