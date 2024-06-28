@@ -1,7 +1,13 @@
 package Model;
 
-import java.util.HashMap;
+import lombok.*;
 
+import java.util.HashMap;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class Comment {
-    private HashMap<MiniProfile, HashMap<Integer, String>> commentedUsers;
+    private HashMap<MiniProfile, HashMap<Integer, String>> commentedUsers = new HashMap<>();
 }

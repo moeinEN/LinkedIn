@@ -1,17 +1,12 @@
 package Database;
 
 import Model.*;
-import Model.Requests.CommentRequest;
-import Model.Requests.CreateProfileRequest;
-import Model.Requests.WatchConnectionListRequest;
-import Model.Requests.WatchProfileRequest;
+import Model.Requests.*;
 import Model.Response.*;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.sql.Date;
+import java.util.*;
 
 public class DatabaseQueryController {
     //TODO rollback option
@@ -710,6 +705,7 @@ public class DatabaseQueryController {
         }
     }
 
+    //POST
     public static void insertPost(Post post, int userId) throws SQLException {
         String sql = "INSERT INTO POST (specifiedUserId, caption) VALUES (?, ?)";
         Connection conn = DbController.getConnection();
@@ -725,7 +721,6 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-
     public static void insertComment(CommentRequest comment, int userId) throws SQLException {
         String sql = "INSERT INTO COMMENT (specifiedUserId, specifiedPostId, comment) VALUES (?, ?, ?)";
         Connection conn = DbController.getConnection();
@@ -743,77 +738,149 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-
-    public static void insertLike(int postId, int userId) throws SQLException {
-        String sql = "INSERT INTO LIKE (specifiedUserId, specifiedPostId) VALUES (?, ?, ?)";
+    public static void insertLike(LikeRequest likeRequest, int userId) throws SQLException {
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
+        if (!likeRequest.getLikeOrDislike()) {
+            deleteLikeIfExist(conn, likeRequest.getPostIdentification(), userId);
+        } else {
+            String sql = "INSERT INTO LIKE (specifiedUserId, specifiedPostId) VALUES (?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            try {
+                pstmt.setInt(1, userId);
+                pstmt.setInt(2, likeRequest.getPostIdentification());
+                pstmt.executeUpdate();
+                conn.commit();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                conn.rollback();
+            }
+        }
+    }
+    public static void deleteLikeIfExist(Connection conn, int postID, int userID) throws SQLException {
+        String sql = "DELETE FROM LIKE WHERE specifiedUserId = ? AND specifiedPostId = ?";
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            pstmt.setInt(1, userId);
-            pstmt.setInt(2, postId);
+            pstmt.setInt(1, userID);
+            pstmt.setInt(2, postID);
             pstmt.executeUpdate();
             conn.commit();
         }
         catch (Exception e) {
             e.printStackTrace();
-            throw e;
+            conn.rollback();
         }
     }
-
-    public static void insertPendingConnect(int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO Pending (specifiedSenderId, specifiedReceiverId) VALUES (?, ?, ?)";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setInt(1, senderId);
-            pstmt.setInt(2, receiverId);
-            pstmt.executeUpdate();
-            conn.commit();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    public static void insertConnect(int senderId, int receiverId, String note) throws SQLException {
-        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId, note) VALUES (?, ?, ?)";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setInt(1, senderId);
-            pstmt.setInt(2, receiverId);
-            pstmt.setString(3, note);
-            pstmt.executeUpdate();
-            conn.commit();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    public static MiniProfile getUserMiniProfile(int profileId) throws SQLException {
-        String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
+    public static Like getLikes(Connection conn, int specifiedPostId) throws SQLException {
+        String sql = "SELECT * FROM Like WHERE specifiedPostId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, profileId);
+            pstmt.setInt(1, specifiedPostId);
             ResultSet rs = pstmt.executeQuery();
-            String firstName = rs.getString("firstName");
-            String lastName = rs.getString("lastName");
-            String imageUrl = rs.getString("imageUrl");
-            return new MiniProfile(firstName, lastName, imageUrl, profileId);
+            Like like = new Like();
+            while (rs.next()) {
+                int userId = rs.getInt("specifiedUserId");
+                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
+                like.getLikedUsers().add(miniProfile);
+            }
+            return like;
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }
-        return null;
+    }
+    public static Comment getComments(Connection conn, int specifiedPostId) throws SQLException {
+        String sql = "SELECT * FROM Comment WHERE specifiedPostId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, specifiedPostId);
+            ResultSet rs = pstmt.executeQuery();
+            Comment comment = new Comment();
+            while (rs.next()) {
+                int userId = rs.getInt("specifiedUserId");
+                int commentId = rs.getInt("id");
+                String commentText = rs.getString("comment");
+                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
+                if (comment.getCommentedUsers().containsKey(miniProfile)){
+                    comment.getCommentedUsers().get(miniProfile).put(commentId, commentText);
+                } else {
+                    HashMap<Integer, String> temp = new HashMap<>();
+                    temp.put(commentId, commentText);
+                    comment.getCommentedUsers().put(miniProfile, temp);
+                }
+            }
+            return comment;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
+        String sql = "SELECT * FROM POST WHERE caption like ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        String searchedText = "%" + searchPostsRequest.getText() + "%";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, searchedText);
+
+            ResultSet rs = pstmt.executeQuery();
+            WatchPostSearchResults watchPostSearchResults = new WatchPostSearchResults();
+            while (rs.next()) {
+                int postId = rs.getInt("id");
+                String caption = rs.getString("caption");
+                Like like = getLikes(conn, postId);
+                Comment comment = getComments(conn, postId);
+                Post post = new Post();
+                post.setComments(comment);
+                post.setText(caption);
+                post.setLikes(like);
+                post.setIdentification(postId);
+                watchPostSearchResults.getPosts().add(post);
+            }
+            conn.commit();
+            return watchPostSearchResults;
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+        return new WatchPostSearchResults();
     }
 
-    public static WatchConnectionPendingLists selectPendingConnects(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+    //CONNECTION
+    public static void insertPendingConnect(int receiverId, ConnectRequest connectRequest) throws SQLException {
+        String sql = "INSERT INTO Pending (specifiedSenderId, specifiedReceiverId, note) VALUES (?, ?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            int senderId = connectRequest.getIdentificationCode();
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.setString(3, connectRequest.getNote());
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void insertConnect(int senderId, int receiverId) throws SQLException {
+        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        try {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            conn.commit();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static WatchConnectionPendingLists selectPendingConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
         String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
         int receiverId = watchConnectionListRequest.getMyProfileId();
         Connection conn = DbController.getConnection();
@@ -824,11 +891,12 @@ public class DatabaseQueryController {
             WatchConnectionPendingLists watchConnectionPendingLists = new WatchConnectionPendingLists();
             while (rs.next()) {
                 int senderId = rs.getInt("specifiedSenderId");
-                MiniProfile miniProfile = getUserMiniProfile(senderId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
                 if (Objects.nonNull(miniProfile)) {
                     watchConnectionPendingLists.getPendingLists().put(miniProfile, miniProfile.getFirstName() + " " + miniProfile.getLastName());
                 }
             }
+            conn.commit();
             return watchConnectionPendingLists;
         } catch (Exception e) {
             e.printStackTrace();
@@ -836,13 +904,54 @@ public class DatabaseQueryController {
         }
         return new WatchConnectionPendingLists();
     }
-
-    public static CreateProfileRequest watchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
-        CreateProfileRequest profileToWatch = new CreateProfileRequest();
-
-        return null;
+    public static void acceptOrDeclineConnection(int receiverId, AcceptConnection acceptConnection) throws SQLException {
+        String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int senderId = acceptConnection.getConnectionIdentification();
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            if (acceptConnection.getAcceptOrDecline()){
+                addConnectionToUser(conn, senderId, receiverId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+    }
+    public static void addConnectionToUser(Connection conn, int senderId, int receiverId) throws SQLException {
+        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
+    //PROFILE
+    public static MiniProfile getUserMiniProfile(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String imageUrl = rs.getString("imageUrl");
+            return new MiniProfile(firstName, lastName, imageUrl, profileId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static CreateProfileRequest watchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
+        CreateProfileRequest profileToWatch = new CreateProfileRequest();
+        return null;
+    }
     public static ProfileExperience getProfileExperience(int profileId) throws SQLException {
         String sql = "SELECT * FROM ProfileExperience WHERE specifiedProfileId = ?";
         Connection conn = DbController.getConnection();
@@ -863,7 +972,6 @@ public class DatabaseQueryController {
         }
         return null;
     }
-
     public static List<ProfileJob> getProfileJob(int profileId, boolean isCurrent) throws SQLException {
         String sql = "SELECT * FROM ProfileJob WHERE specifiedProfileId = ? AND isCurrentJob = ?";
 
@@ -904,7 +1012,6 @@ public class DatabaseQueryController {
         }
         return null;
     }
-
     public static List<ProfileVoluntaryActivities> getProfileVoluntaryActivities(int profileExperienceId) throws SQLException{
         String sql = "SELECT * FROM ProfileVoluntaryActivities WHERE specifiedProfileExperienceId = ?";
         Connection conn = DbController.getConnection();
@@ -925,7 +1032,6 @@ public class DatabaseQueryController {
         return null;
 
     }
-
     public static List<ProfileSports> getProfileSports(int profileExperienceId) throws SQLException {
         String sql = "SELECT * FROM ProfileSports WHERE specifiedProfileExperienceId = ?";
         Connection conn = DbController.getConnection();
@@ -947,33 +1053,7 @@ public class DatabaseQueryController {
         return null;
     }
 
-    public static void acceptOrDeclineConnection(int senderId, int receiverId, boolean connect) throws SQLException {
-        String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, senderId);
-            pstmt.setInt(2, receiverId);
-            pstmt.executeUpdate();
-            if (connect){
-                addConnectionToUser(conn, senderId, receiverId);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            conn.rollback();
-        }
-    }
 
-    public static void addConnectionToUser(Connection conn, int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, senderId);
-            pstmt.setInt(2, receiverId);
-            pstmt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
+
 
 }
