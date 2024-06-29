@@ -1,6 +1,8 @@
 package Service;
 
-import Model.Requests.*;
+import Model.Requests.LoginCredentials;
+import Model.Requests.CreateProfileRequest;
+import Model.Requests.RegisterCredentials;
 import Model.User;
 import com.google.gson.JsonObject;
 import okhttp3.ResponseBody;
@@ -32,12 +34,4 @@ public interface UserService {
 
     @POST("/user/profile")
     Call<ResponseBody> profile(@Body CreateProfileRequest profile, @Header("sessionToken") String sessionToken);
-
-    @POST("/like")
-    Call<ResponseBody> like(@Body LikeRequest like, @Header("sessionToken") String sessionToken);
-
-    @POST("/comment")
-    Call<ResponseBody> comment(@Body CommentRequest comment, @Header("sessionToken") String sessionToken);
-
-
 }

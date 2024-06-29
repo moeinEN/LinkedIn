@@ -9,5 +9,5 @@ import lombok.*;
 @ToString
 public class CommentRequest {
     private String comment;
-    private int postIdentification;
+    private String postIdentification;
 }

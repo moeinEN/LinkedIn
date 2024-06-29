@@ -3,7 +3,6 @@ package Model;
 import lombok.*;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -12,5 +11,5 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString
 public class Like {
-    private Set<MiniProfile> likedUsers = new HashSet<>();
+    private Set<MiniProfile> likedUsers;
 }

@@ -6,4 +6,8 @@ public enum JobSkills {
     private JobSkills(String value) {
         this.value = value;
     }
+
+    public String getValue() {
+        return value;
+    }
 }

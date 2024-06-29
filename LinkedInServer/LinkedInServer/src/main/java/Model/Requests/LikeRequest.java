@@ -9,5 +9,5 @@ import lombok.*;
 @ToString
 public class LikeRequest {
     private int postIdentification;
-    private Boolean likeOrDislike = false;
+    private Boolean likeOrUnlike;
 }
