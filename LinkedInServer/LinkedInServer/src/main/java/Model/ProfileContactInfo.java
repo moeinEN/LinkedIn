@@ -18,5 +18,5 @@ public class ProfileContactInfo {
     private String address;
     private Date dateOfBirth;
     private ShowBirthDateTo showBirthDateTo;
-    private String otherContactInfo; //telegram url or watsapp or ...
+    private String otherContactInfo; //telegram url or whatsapp or ...
 }
