@@ -19,7 +19,7 @@ public enum Messages {
     USER_LOGGED_IN_SUCCESSFULLY("User logged in successfully.", 9),
     SESSION_EXPIRED("Session expired!", 10),
     INVALID_TOKEN("Invalid token!", 11),
-    SUCCESS("success", 200),
+    SUCCESS("success", 12),
     INVALID_PROFILE_INPUTS("Invalid profile inputs!", 13),
     UNAUTHORIZED("Unauthorized!", 401),
     BAD_REQUEST("Bad Request!", 400),;

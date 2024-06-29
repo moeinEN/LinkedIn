@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class ConnectRequest {
-    private String identificationCode;
+    private int identificationCode;
     private String note;
 }

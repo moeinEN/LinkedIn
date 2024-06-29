@@ -6,8 +6,4 @@ public enum EducationalSkills {
     private EducationalSkills(String value) {
         this.value = value;
     }
-
-    public String getValue() {
-        return value;
-    }
 }

@@ -86,6 +86,7 @@ public class DatabaseQueryController {
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedProfileId INTEGER,\n" +
                 "    jobSkills TEXT,\n" +
+                "    educationalSkills TEXT,\n" +
                 "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
@@ -186,7 +187,7 @@ public class DatabaseQueryController {
                 "    expiryDate TEXT,\n" +
                 "    certificateId TEXT,\n" +
                 "    certificateURL TEXT,\n" +
-                "    relatedSkills INTEGER ,\n" +
+                "    relatedSkills TEXT,\n" +
                 "    FOREIGN KEY (specifiedProfileId) REFERENCES Profile(id)\n" +
                 ");";
         createTable(sql);
@@ -657,16 +658,20 @@ public class DatabaseQueryController {
     }
 
     public static void insertProfileSkill(Connection conn, ProfileSkills skill, int profileId) throws SQLException {
-        String sql = "INSERT INTO ProfileSkills (specifiedProfileId, jobSkills) VALUES (?, ?)";
+        String sql = "INSERT INTO ProfileSkills (specifiedProfileId, jobSkills, educationalSkills) VALUES (?, ?, ?)";
         StringJoiner joiner = new StringJoiner(",");
         for (JobSkills jobSkills: skill.getJobSkills()){
             joiner.add(jobSkills.getValue());
         }
-        String joinedString = joiner.toString();
+        StringJoiner joiner1 = new StringJoiner(",");
+        for (EducationalSkills educationalSkills : skill.getEducationalSkillsList()){
+            joiner1.add(educationalSkills.getValue());
+        }
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             //conn.setAutoCommit(true);
             pstmt.setInt(1, profileId);
             pstmt.setString(2, joiner.toString());
+            pstmt.setString(3, joiner1.toString());
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -949,34 +954,36 @@ public class DatabaseQueryController {
         }
     }
     public static CreateProfileRequest watchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
-        CreateProfileRequest profileToWatch = new CreateProfileRequest();
-        return null;
-    }
-    public static ProfileExperience getProfileExperience(int profileId) throws SQLException {
-        String sql = "SELECT * FROM ProfileExperience WHERE specifiedProfileId = ?";
         Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
+        ProfileExperience profileExperience = getProfileExperience(conn, watchProfileRequest.getProfileId());
+        List<ProfileEducation> profileEducations = getProfileEducation(conn, watchProfileRequest.getProfileId(), false);
+        List<Certificate> certificates = getCertificate(conn, watchProfileRequest.getProfileId());
+        ProfileHeader profileHeader = getProfileHeader(conn, watchProfileRequest.getProfileId());
+        ProfileSkills profileSkills = getProfileSkills(conn, watchProfileRequest.getProfileId());
+        ProfileOrganizations profileOrganizations = getProfileOrganization(conn, watchProfileRequest.getProfileId());
+        CreateProfileRequest profileToWatch = new CreateProfileRequest(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations);
+        return profileToWatch;
+    }
+    public static ProfileExperience getProfileExperience(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM ProfileExperience WHERE specifiedProfileId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, profileId);
             ResultSet rs = pstmt.executeQuery();
-            List<ProfileJob> profileJobs = getProfileJob(rs.getInt("specifiedProfileId"), false);
-            List<ProfileVoluntaryActivities> profileVoluntaryActivities = getProfileVoluntaryActivities(rs.getInt("id"));
+            List<ProfileJob> profileJobs = getProfileJob(conn, rs.getInt("specifiedProfileId"), false);
+            List<ProfileVoluntaryActivities> profileVoluntaryActivities = getProfileVoluntaryActivities(conn, rs.getInt("id"));
             String militaryService = rs.getString("militaryServiceDate");
             Date militaryServiceDate = Date.valueOf(rs.getString("militaryServiceDate"));
             String ceoExperience = rs.getString("ceoExperience");
             Date ceoExperienceDate = Date.valueOf(rs.getString("ceoExperienceDate"));
-            List<ProfileSports> profileSports = getProfileSports(rs.getInt("id"));
+            List<ProfileSports> profileSports = getProfileSports(conn, rs.getInt("id"));
             return new ProfileExperience(profileJobs, profileVoluntaryActivities, militaryService, militaryServiceDate, ceoExperience, ceoExperienceDate, profileSports);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    public static List<ProfileJob> getProfileJob(int profileId, boolean isCurrent) throws SQLException {
+    public static List<ProfileJob> getProfileJob(Connection conn, int profileId, boolean isCurrent) throws SQLException {
         String sql = "SELECT * FROM ProfileJob WHERE specifiedProfileId = ? AND isCurrentJob = ?";
-
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, profileId);
             if(isCurrent)
@@ -1006,15 +1013,15 @@ public class DatabaseQueryController {
                 Boolean isCurrentJob = rs.getBoolean("isCurrentJob");
                 profileJobs.add(new ProfileJob(title, jobStatus, companyName, workplaceLocation, jobWorkplaceStatus, companyActivityStatus, startDate, endDate, currentlyWorking, description, jobSkills, informOthersForTheProfileUpdate, isCurrentJob));
             }
+            return profileJobs;
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    public static List<ProfileVoluntaryActivities> getProfileVoluntaryActivities(int profileExperienceId) throws SQLException{
+    public static List<ProfileVoluntaryActivities> getProfileVoluntaryActivities(Connection conn, int profileExperienceId) throws SQLException{
         String sql = "SELECT * FROM ProfileVoluntaryActivities WHERE specifiedProfileExperienceId = ?";
-        Connection conn = DbController.getConnection();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, profileExperienceId);
             ResultSet rs = pstmt.executeQuery();
@@ -1025,6 +1032,7 @@ public class DatabaseQueryController {
                 Date date = Date.valueOf(rs.getString("date"));
                 profileVoluntaryActivities.add(new ProfileVoluntaryActivities(desc, date));
             }
+            return profileVoluntaryActivities;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -1032,10 +1040,8 @@ public class DatabaseQueryController {
         return null;
 
     }
-    public static List<ProfileSports> getProfileSports(int profileExperienceId) throws SQLException {
+    public static List<ProfileSports> getProfileSports(Connection conn, int profileExperienceId) throws SQLException {
         String sql = "SELECT * FROM ProfileSports WHERE specifiedProfileExperienceId = ?";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, profileExperienceId);
             ResultSet rs = pstmt.executeQuery();
@@ -1046,14 +1052,167 @@ public class DatabaseQueryController {
                 Date date = Date.valueOf(rs.getString("date"));
                 profileSports.add(new ProfileSports(desc, date));
             }
+            return profileSports;
         }
         catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
+    public static List<ProfileEducation> getProfileEducation(Connection conn, int profileId, boolean isCurrent) throws SQLException {
+        String sql = "SELECT * FROM ProfileEducation WHERE specifiedProfileId = ? AND isCurrentEducation = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            if (isCurrent)
+                pstmt.setInt(2, 1);
+            else
+                pstmt.setInt(2, 1);
 
+            ResultSet rs = pstmt.executeQuery();
 
+            List<ProfileEducation> profileEducations = new ArrayList<>();
+            while (rs.next()) {
+                String instituteName = rs.getString("instituteName");
+                Date educationStartDate = Date.valueOf(rs.getString("educationStartDate"));
+                Date educationEndDate = Date.valueOf(rs.getString("educationEndDate"));
+                Boolean stillOnEducation = rs.getBoolean("stillOnEducation");
+                String GPA = rs.getString("GPA");
+                String descriptionOfActivitiesAndAssociations = rs.getString("descriptionOfActivitiesAndAssociations");
+                String description = rs.getString("description");
+                List<EducationalSkills> educationalSkills = new ArrayList<>();
+                String[] skills = rs.getString("educationalSkills").split(",");
+                for (String str : skills)
+                    educationalSkills.add(EducationalSkills.valueOf(str));
+                Boolean informOthersForTheProfileUpdate = rs.getBoolean("informOthersForTheProfileUpdate");
+                Boolean isCurrentEducation = rs.getBoolean("isCurrentEducation");
+                profileEducations.add(new ProfileEducation(instituteName, educationStartDate, educationEndDate, stillOnEducation, GPA, descriptionOfActivitiesAndAssociations, description, educationalSkills, informOthersForTheProfileUpdate, isCurrentEducation));
+            }
+            return profileEducations;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static List<Certificate> getCertificate(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM Certificate WHERE specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
 
+            List<Certificate> certificates = new ArrayList<>();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String organizationName = rs.getString("organizationName");
+                Date issueDate = Date.valueOf(rs.getString("issueDate"));
+                Date expiryDate = Date.valueOf(rs.getString("expiryDate"));
+                String certificateId = rs.getString("certificateId");
+                String certificateURL = rs.getString("certificateURL");
+                List<String> relatedSkills = new ArrayList<>();
+                String[] skills  = rs.getString("relatedSkills").split(",");
+                for (String str : skills)
+                    relatedSkills.add(str);
+
+                certificates.add(new Certificate(name, organizationName, issueDate, expiryDate, certificateId, certificateURL, relatedSkills));
+            }
+            return certificates;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static ProfileHeader getProfileHeader(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM ProfileHeader WHERE specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String additionalName = rs.getString("additionalName");
+            String mainImageUrl = rs.getString("mainImageUrl");
+            String backgroundImageUrl = rs.getString("backgroundImageUrl");
+            String about = rs.getString("about");
+            ProfileJob profileJob = getProfileJob(conn, profileId, true).get(0);
+            ProfileEducation profileEducation = getProfileEducation(conn, profileId, true).get(0);
+            String country = rs.getString("country");
+            String city = rs.getString("city");
+            String profession = rs.getString("profession");
+            String jobStatus = rs.getString("jobStatus");
+            ProfileContactInfo profileContactInfo = getProfileContactInfo(conn, rs.getInt("id"));
+            return new ProfileHeader(firstName, lastName, additionalName, mainImageUrl, backgroundImageUrl, about, profileJob, profileEducation, country, city, profession, profileContactInfo, jobStatus);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static ProfileContactInfo getProfileContactInfo(Connection conn, int profileHeaderId) throws SQLException {
+        String sql = "SELECT * FROM ProfileContactInfo WHERE specifiedProfileHeaderId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileHeaderId);
+            ResultSet rs = pstmt.executeQuery();
+
+            String linkUrl = rs.getString("linkUrl");
+            String emailAddress = rs.getString("emailAddress");
+            String phoneNumber = rs.getString("phoneNumber");
+            PhoneType phoneType = PhoneType.valueOf(rs.getString("phoneType"));
+            String address = rs.getString("address");
+            Date dateOfBirth = Date.valueOf(rs.getString("dateOfBirth"));
+            ShowBirthDateTo showBirthDateTo = ShowBirthDateTo.valueOf(rs.getString("showBirthDateTo"));
+            String otherContactInfo = rs.getString("otherContactInfo");
+
+            return new ProfileContactInfo(linkUrl, emailAddress, phoneNumber, phoneType, address, dateOfBirth, showBirthDateTo, otherContactInfo);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static ProfileSkills getProfileSkills(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM ProfileSkills WHERE specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+
+            List<JobSkills> jobSkills = new ArrayList<>();
+            String[] skills = rs.getString("jobSkills").split(",");
+            for (String str : skills){
+                jobSkills.add(JobSkills.valueOf(str));
+            }
+
+            List<EducationalSkills> educationalSkills = new ArrayList<>();
+            String[] eSkills = rs.getString("educationalSkills").split(",");
+            for (String str : eSkills){
+                educationalSkills.add(EducationalSkills.valueOf(str));
+            }
+
+            return new ProfileSkills(jobSkills, educationalSkills);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static ProfileOrganizations getProfileOrganization(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM ProfileOrganizations WHERE specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+
+            String organizationName = rs.getString("organizationName");
+            String positionInOrganization = rs.getString("positionInOrganization");
+            Date startCooperateDate = Date.valueOf(rs.getString("startCooperateDate"));
+            Date endCooperateDate = Date.valueOf(rs.getString("endCooperateDate"));
+            Boolean isActive = rs.getBoolean("isActive");
+
+            return new ProfileOrganizations(organizationName, positionInOrganization, startCooperateDate, endCooperateDate, isActive);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 }

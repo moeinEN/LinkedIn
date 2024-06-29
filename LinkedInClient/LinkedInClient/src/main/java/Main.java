@@ -71,7 +71,7 @@ public class Main {
 
         List<Certificate> certificates = new ArrayList<>();//#####################################
         Certificate certificate = new Certificate("Pro Player G+", "ESL", new SimpleDateFormat("yyyy-MM").parse("2023-01"),
-                new SimpleDateFormat("yyyy-MM").parse("2023-04"), "UCL 22-12", "www.faceit.com", Arrays.asList("Flirt","Aim"));
+                new SimpleDateFormat("yyyy-MM").parse("2023-04"), "UCL 22-12", "www.sex.com", Arrays.asList("Sex","Aim"));
         certificates.add(certificate);
 
         ProfileJob currentJob = new ProfileJob("Java Developer", JobStatus.FULL_TIME, "Behsa",
@@ -82,12 +82,12 @@ public class Main {
                 false, true);
         ProfileContactInfo profileContactInfo = new ProfileContactInfo("aaa.aaa.com", "a@A.com", "0912", PhoneType.MOBILE_PHONE,
                 "saghez", new SimpleDateFormat("yyyy-MM").parse("2004-11"), ShowBirthDateTo.ALL, "tel.me/lesbian");
-        ProfileHeader profileHeader = new ProfileHeader("Moein", "Enayati", null, "aaa.aaa.com", "aaa.vvv.com", "hichi vala", currentJob, profileEducation2,
-                "Iran", "Karaj", "Engineer", profileContactInfo, "star"); //#################
+        ProfileHeader profileHeader = new ProfileHeader("Parsa", "Enayati", null, "aaa.aaa.com", "aaa.vvv.com", "man gay hastam", currentJob, profileEducation2,
+                "Iran", "Karaj", "Engineer", profileContactInfo, "Sexy"); //#################
 
 
         ProfileSkills profileSkills = new ProfileSkills(Arrays.asList(JobSkills.EMPTY), Arrays.asList(EducationalSkills.EMPTY)); //######
-        ProfileOrganizations profileOrganizations = new ProfileOrganizations("hamsterWithX", "actor", new SimpleDateFormat("yyyy-MM").parse("2024-11"), null, true);
+        ProfileOrganizations profileOrganizations = new ProfileOrganizations("Brazzers", "actor", new SimpleDateFormat("yyyy-MM").parse("2024-11"), null, true);
 
 
 
