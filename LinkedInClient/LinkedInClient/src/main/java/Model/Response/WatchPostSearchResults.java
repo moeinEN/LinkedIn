@@ -3,6 +3,7 @@ package Model.Response;
 import Model.Post;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 @Getter
 @Setter
@@ -10,5 +11,5 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class WatchPostSearchResults {
-    private List<Post> posts;
+    private List<Post> posts = new ArrayList<>();
 }

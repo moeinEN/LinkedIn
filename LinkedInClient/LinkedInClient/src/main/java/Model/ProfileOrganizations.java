@@ -15,6 +15,5 @@ public class ProfileOrganizations {
     private String position;
     private Date startDate;
     private Date endDate;
-    private boolean currentlyWorking;
-
+    private Boolean currentlyWorking;
 }

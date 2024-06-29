@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class LikeRequest {
-    private int postIdentification;
-    private Boolean likeOrDislike = false;
+public class WatchConnectionListRequest {
+    private int myProfileId;
 }

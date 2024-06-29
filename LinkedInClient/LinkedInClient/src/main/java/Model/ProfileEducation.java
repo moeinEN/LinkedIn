@@ -13,11 +13,11 @@ public class ProfileEducation {
     private String instituteName;
     private Date educationStartDate;
     private Date educationEndDate;
-    private boolean stillOnEducation;
+    private Boolean stillOnEducation;
     private String GPA;
     private String descriptionOfActivitiesAndAssociations;
     private String description;
     private List<EducationalSkills> educationalSkills;
-    private boolean informOthersForTheProfileUpdate;
-    private boolean isCurrentProfileEducation;
+    private Boolean informOthersForTheProfileUpdate;
+    private Boolean isCurrentProfileEducation;
 }
