@@ -95,6 +95,7 @@ public class Main {
 //        Messages makeProfile = retrofitBuilder.syncCallProfile(profile);
 //        System.out.println(makeProfile.getMessage());
 
-        retrofitBuilder.asyncCallUpload("src/main/resources/test.jpg");
+//        retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
+        retrofitBuilder.asyncCallDownload("test2.mp4");
     }
 }

@@ -90,6 +90,16 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/files", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.downloadHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         // Start the server
         server.setExecutor(null); // creates a default executor
         server.start();

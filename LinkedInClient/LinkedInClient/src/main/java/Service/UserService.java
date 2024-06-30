@@ -45,4 +45,8 @@ public interface UserService {
     @POST("/upload")
     Call<ResponseBody> upload(@Part MultipartBody.Part file);
 
+    @Streaming
+    @GET("files/{filename}")
+    Call<ResponseBody> downloadFile(@Path("filename") String filename);
+
 }

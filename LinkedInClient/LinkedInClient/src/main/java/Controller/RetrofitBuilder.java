@@ -15,7 +15,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import static Controller.FileController.writeResponseBodyToDisk;
 
 public class RetrofitBuilder {
 
@@ -180,6 +184,8 @@ public class RetrofitBuilder {
         }
     }
 
+    //TODO add size limit to uploaded files
+    //TODO filenames
     public void asyncCallUpload(String filePath) {
         File file = new File(filePath);
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
@@ -206,4 +212,29 @@ public class RetrofitBuilder {
         });
     }
 
+    public void asyncCallDownload(String filename) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> call = service.downloadFile(filename);
+
+        call.enqueue(new retrofit2.Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    boolean success = writeResponseBodyToDisk(response.body(), filename);
+                    if (success) {
+                        System.out.println("File downloaded successfully");
+                    } else {
+                        System.out.println("Failed to save the file");
+                    }
+                } else {
+                    System.out.println("Server returned an error: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
+    }
 }
