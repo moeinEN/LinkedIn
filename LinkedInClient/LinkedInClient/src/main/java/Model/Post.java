@@ -2,6 +2,9 @@ package Model;
 
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,4 +15,5 @@ public class Post {
     private Like likes;
     private Comment comments;
     private int identification;
+    List<String> hashtags = new ArrayList<>();
 }

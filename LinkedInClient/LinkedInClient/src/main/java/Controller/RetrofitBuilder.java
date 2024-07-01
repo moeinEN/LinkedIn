@@ -3,6 +3,7 @@ package Controller;
 
 import Model.*;
 import Model.Requests.*;
+import Model.Response.ProfileResponse;
 import Model.User;
 import Service.UserService;
 import com.google.gson.Gson;
@@ -236,5 +237,46 @@ public class RetrofitBuilder {
                 throwable.printStackTrace();
             }
         });
+    }
+
+    public Messages acceptConnection(AcceptConnection acceptConnection){
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callAcceptConnection = service.acceptConnection(acceptConnection, Cookies.getSessionToken());
+        Messages ServerResponse;
+        try {
+            Response<ResponseBody> response = callAcceptConnection.execute();
+            byte[] responseBodeBytes = response.body().bytes();
+            Gson gson = new Gson();
+            ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
+
+            return ServerResponse;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
+    public ProfileResponse watchProfileRequest(WatchProfileRequest watchProfileRequest) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callWatchProfile = service.watchProfile(watchProfileRequest, Cookies.getSessionToken());
+        ProfileResponse ServerResponse;
+        try {
+            Response<ResponseBody> response = callWatchProfile.execute();
+            if (response.isSuccessful()) {
+                byte[] responseBodeBytes = response.body().bytes();
+                Gson gson = new Gson();
+                ServerResponse = gson.fromJson(new String(responseBodeBytes), ProfileResponse.class);
+
+                return ServerResponse;
+            }
+            else {
+                return null;
+            }
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+
     }
 }

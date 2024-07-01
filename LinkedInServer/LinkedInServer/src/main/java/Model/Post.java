@@ -16,6 +16,4 @@ public class Post {
     private Comment comments;
     private int identification;
     List<String> hashtags = new ArrayList<>();
-
-    //TODO edit post queries
 }
