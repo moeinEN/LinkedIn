@@ -24,7 +24,7 @@ public class WatchProfileResponse {
     @SerializedName("ProfileOrganizations")
     private ProfileOrganizations organizations;
     @SerializedName("ProfileIdentificationCode")
-    private String identificationCode;
+    private int identificationCode;
     @SerializedName("ProfileFeed")
     private Feed feed;
 }

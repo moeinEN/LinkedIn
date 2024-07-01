@@ -32,7 +32,6 @@ public class HttpHandler {
             }
         });
 
-        // Handle GET requests at /bye
         server.createContext("/bye", new com.sun.net.httpserver.HttpHandler() {
             @Override
             public void handle(HttpExchange exchange) throws IOException {
@@ -94,7 +93,18 @@ public class HttpHandler {
             public void handle(HttpExchange exchange) throws IOException {
                 try {
                     RequestHandler.downloadHandler(exchange);
-                } catch (SQLException e) {
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/watchProfile", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.watchProfile(exchange);
+                }
+                catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }

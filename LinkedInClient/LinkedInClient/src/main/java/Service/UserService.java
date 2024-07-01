@@ -52,7 +52,7 @@ public interface UserService {
     @POST("/acceptConnection")
     Call<ResponseBody> acceptConnection(@Body AcceptConnection acceptConnection, @Header("sessionToken") String sessionToken);
 
-    @POST("watchProfile")
+    @POST("/watchProfile")
     Call<ResponseBody> watchProfile(@Body WatchProfileRequest watchProfile, @Header("sessionToken") String sessionToken);
 
 }

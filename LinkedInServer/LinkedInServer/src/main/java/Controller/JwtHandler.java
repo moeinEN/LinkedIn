@@ -2,6 +2,7 @@ package Controller;
 
 import Database.DatabaseQueryController;
 import Model.Messages;
+import com.sun.net.httpserver.Headers;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -12,6 +13,7 @@ import java.security.Key;
 import java.sql.SQLException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 
 public class JwtHandler {
     // Your 384-bit secret key (base64 encoded) : "aSimpleSecretKeyBase64Encoded384BitForLinkedInProject"
@@ -76,6 +78,21 @@ public class JwtHandler {
             return Messages.INVALID_TOKEN;
         }
         return Messages.SUCCESS;
+    }
+
+    public static int validateSessionToken(Headers requestHeaders) throws SQLException {
+        if (requestHeaders.containsKey("sessionToken")) {
+            List<String> sessionTokens = requestHeaders.get("sessionToken");
+            String sessionToken = sessionTokens.get(0);
+            if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
+                return JwtHandler.getUserIdFromJwtToken(sessionToken);
+            }
+            else {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
     }
 
     public static int getUserIdFromJwtToken(String jwt) throws IllegalArgumentException, SQLException {

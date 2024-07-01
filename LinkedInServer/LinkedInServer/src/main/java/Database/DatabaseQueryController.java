@@ -99,6 +99,16 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+    public static void createTableFollow() throws SQLException {
+        String sql = "CREATE TABLE Follow (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedfollowerId INTEGER,\n" +
+                "    specifiedfollowingId INTEGER,\n" +
+                "    FOREIGN KEY (specifiedfollowerId) REFERENCES USER(id),\n" +
+                "    FOREIGN KEY (specifiedfollowingId) REFERENCES USER(id)\n" +
+                ");";
+        createTable(sql);
+    }
     public static void createTablePendingConnect() throws SQLException {
         String sql = "CREATE TABLE Pending (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -957,7 +967,28 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public static CreateProfileRequest watchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
+//    public static WatchProfileSearchResults getWatchProfileSearchResults(SearchProfileRequest searchProfileRequest) throws SQLException {
+//        String sql = "SELECT * FROM ProfileExperience WHERE specifiedProfileId = ?";
+//
+//        Connection conn = DbController.getConnection();
+//        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//            pstmt.setInt(1, profileId);
+//            ResultSet rs = pstmt.executeQuery();
+//            List<ProfileJob> profileJobs = getProfileJob(conn, rs.getInt("specifiedProfileId"), false);
+//            List<ProfileVoluntaryActivities> profileVoluntaryActivities = getProfileVoluntaryActivities(conn, rs.getInt("id"));
+//            String militaryService = rs.getString("militaryServiceDate");
+//            Date militaryServiceDate = Date.valueOf(rs.getString("militaryServiceDate"));
+//            String ceoExperience = rs.getString("ceoExperience");
+//            Date ceoExperienceDate = Date.valueOf(rs.getString("ceoExperienceDate"));
+//            List<ProfileSports> profileSports = getProfileSports(conn, rs.getInt("id"));
+//            return new WatchProfileSearchResults(profileJobs, profileVoluntaryActivities, militaryService, militaryServiceDate, ceoExperience, ceoExperienceDate, profileSports);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+
+    public static WatchProfileResponse getWatchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
         Connection conn = DbController.getConnection();
         ProfileExperience profileExperience = getProfileExperience(conn, watchProfileRequest.getProfileId());
         List<ProfileEducation> profileEducations = getProfileEducation(conn, watchProfileRequest.getProfileId(), false);
@@ -965,7 +996,7 @@ public class DatabaseQueryController {
         ProfileHeader profileHeader = getProfileHeader(conn, watchProfileRequest.getProfileId());
         ProfileSkills profileSkills = getProfileSkills(conn, watchProfileRequest.getProfileId());
         ProfileOrganizations profileOrganizations = getProfileOrganization(conn, watchProfileRequest.getProfileId());
-        CreateProfileRequest profileToWatch = new CreateProfileRequest(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations);
+        WatchProfileResponse profileToWatch = new WatchProfileResponse(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations, watchProfileRequest.getProfileId(), null);
         return profileToWatch;
     }
     public static ProfileExperience getProfileExperience(Connection conn, int profileId) throws SQLException {

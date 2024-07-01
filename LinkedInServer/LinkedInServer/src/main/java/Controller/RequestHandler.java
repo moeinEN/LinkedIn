@@ -4,6 +4,7 @@ import Database.DatabaseQueryController;
 import Model.*;
 import Model.Requests.LoginCredentials;
 import Model.Requests.RegisterCredentials;
+import Model.Requests.WatchProfileRequest;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -158,70 +159,48 @@ public class RequestHandler {
     }
     public static void profileHandler(HttpExchange exchange) throws IOException, SQLException {
         if ("POST".equals(exchange.getRequestMethod())) {
-            int userId = 0;
+            byte[] response;
+            int responseCode;
+
             Headers requestHeaders = exchange.getRequestHeaders();
-            if (requestHeaders.containsKey("sessionToken")) {
-                List<String> sessionTokens = requestHeaders.get("sessionToken");
-                String sessionToken = sessionTokens.get(0);
-                if(JwtHandler.validateUserSession(sessionToken) == Messages.SUCCESS) {
-                    userId = JwtHandler.getUserIdFromJwtToken(sessionToken);
-                }
-                else {
-                    byte[] response = Messages.UNAUTHORIZED.toByte("UTF-8");
-                    exchange.sendResponseHeaders(UNAUTHORIZED.getStatusCode(), response.length); // 405 Method Not Allowed
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response);
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    Profile recievedProfile = null;
+                    try {
+                        recievedProfile = gson.fromJson(reader, Profile.class);
+                        try {
+                            DatabaseQueryController.insertProfile(recievedProfile, userId);
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
                     }
                 }
-            } else {
-                byte[] response = Messages.UNAUTHORIZED.toByte("UTF-8");
-                exchange.sendResponseHeaders(UNAUTHORIZED.getStatusCode(), response.length); // 405 Method Not Allowed
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response);
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
                 }
             }
-
-            try (InputStream requestBody = exchange.getRequestBody();
-                 InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
-                Gson gson = new Gson();
-                Profile recievedProfile = null;
-                try {
-                    recievedProfile = gson.fromJson(reader, Profile.class);
-                }
-                catch (IllegalArgumentException e) {
-                    logger.info(e.getMessage());
-                    byte[] response = e.getMessage().getBytes("UTF-8");
-                    exchange.sendResponseHeaders(INVALID_PROFILE_INPUTS.getStatusCode(), response.length); // 400 Bad Request
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response);
-                    }
-                    return;
-                }
-                try {
-                    DatabaseQueryController.insertProfile(recievedProfile, userId);
-                    byte[] response = SUCCESS.toByte("UTF-8");
-                    exchange.sendResponseHeaders(SUCCESS.getStatusCode(), response.length); // 400 Bad Request
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response);
-                    }
-                } catch (SQLException exception) {
-                    exception.printStackTrace();
-                    byte[] response = INTERNAL_ERROR.toByte("UTF-8");
-                    exchange.sendResponseHeaders(INTERNAL_ERROR.getStatusCode(), response.length); // 400 Bad Request
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response);
-                    }
-                }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
             }
-            catch (Exception e) {
-                e.printStackTrace();
-                byte[] response = BAD_REQUEST.toByte("UTF-8");
-                exchange.sendResponseHeaders(BAD_REQUEST.getStatusCode(), response.length);
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response);
-                }
-            }
-
         } else {
             byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
             exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
@@ -295,6 +274,50 @@ public class RequestHandler {
             }
         } else {
             exchange.sendResponseHeaders(405, -1); // 405 Method Not Allowed
+        }
+    }
+    public static void watchProfile(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    WatchProfileRequest watchProfileRequest = null;
+                    try {
+                        watchProfileRequest = gson.fromJson(reader, WatchProfileRequest.class);
+                        try {
+
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                }
+            }
+
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
         }
     }
 }
