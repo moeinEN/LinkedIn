@@ -11,7 +11,8 @@ public enum JobStatus {
     CONTRACT("Contract"),
     INTERNSHIP("Internship"),
     PAID_INTERNSHIP("Paid Internship"),
-    SEASONAL("Seasonal");
+    SEASONAL("Seasonal"),
+    NULL("");
 
     private String value;
     private JobStatus(String value) {

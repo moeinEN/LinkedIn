@@ -18,5 +18,4 @@ public class SearchProfileRequest {
     private JobStatus jobStatus;
     private String profession;
     private String jobTitle;
-    private List<JobSkills> jobSkills;
 }
