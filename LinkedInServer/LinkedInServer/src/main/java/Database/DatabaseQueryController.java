@@ -390,12 +390,13 @@ public class DatabaseQueryController {
         }
     }
     public WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
-        String sql = "SELECT * FROM POST WHERE caption like ?";
+        String sql = "SELECT * FROM POST WHERE caption like ? OR hashtag like ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         String searchedText = "%" + searchPostsRequest.getText() + "%";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, searchedText);
+            pstmt.setString(2, searchedText);
 
             ResultSet rs = pstmt.executeQuery();
             WatchPostSearchResults watchPostSearchResults = new WatchPostSearchResults();
