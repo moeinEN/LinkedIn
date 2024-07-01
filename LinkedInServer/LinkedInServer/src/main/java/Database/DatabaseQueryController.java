@@ -971,7 +971,7 @@ public class DatabaseQueryController {
         }
     }
     public static WatchProfileSearchResults getWatchProfileSearchResults(SearchProfileRequest searchProfileRequest) throws SQLException {
-        String sql = "SELECT * FROM (SELECT ProfileHeader.specifiedProfileId, ProfileHeader.firstName, ProfileHeader.lastName, ProfileHeader.city, ProfileHeader.country, ProfileHeader.jobStatus, ProfileHeader.profession, ProfileJob.title FROM ProfileHeader INNER JOIN ProfileJob ON ProfileHeader.specifiedProfileId = ProfileJob.specifiedProfileId) WHERE firstName LIKE ? AND lastName LIKE ? AND city LIKE ? AND country LIKE ? AND jobStatus LIKE ? AND profession LIKE ? AND title LIKE ?;";
+        String sql = "SELECT * FROM (SELECT ProfileHeader.specifiedProfileId, ProfileHeader.firstName, ProfileHeader.lastName, ProfileHeader.city, ProfileHeader.country, ProfileHeader.jobStatus, ProfileHeader.profession, ProfileJob.title, ProfileJob.isCurrentJob FROM ProfileHeader INNER JOIN ProfileJob ON ProfileHeader.specifiedProfileId = ProfileJob.specifiedProfileId) WHERE firstName LIKE ? AND lastName LIKE ? AND city LIKE ? AND country LIKE ? AND jobStatus LIKE ? AND profession LIKE ? AND title LIKE ? AND isCurrentJob = ?;";
         Connection conn = DbController.getConnection();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "%" + searchProfileRequest.getFirstName() + "%");
@@ -981,6 +981,7 @@ public class DatabaseQueryController {
             pstmt.setString(5, "%" + searchProfileRequest.getJobStatus().getValue() + "%");
             pstmt.setString(6, "%" + searchProfileRequest.getProfession() + "%");
             pstmt.setString(7, "%" + searchProfileRequest.getJobTitle() + "%");
+            pstmt.setInt(8, 1);
             ResultSet rs = pstmt.executeQuery();
 
             List<MiniProfile> miniProfiles = new ArrayList<>();
