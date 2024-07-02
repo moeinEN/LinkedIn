@@ -215,7 +215,7 @@ public class DatabaseQueryController {
 
 
     //POST
-    public static void createTableUserWatchList(int userId) throws SQLException {
+    public static void createTableUserWatchList() throws SQLException {
         String sql = "CREATE TABLE UserWatchList (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                 "    specifiedUserId INTEGER,\n" +
