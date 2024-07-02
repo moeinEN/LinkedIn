@@ -15,10 +15,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.commons.io.FilenameUtils;
 
 import static Controller.FileController.writeResponseBodyToDisk;
 
@@ -65,14 +67,16 @@ public class RetrofitBuilder {
             return null; }
     }
 
-    public JsonObject syncCallSayHello(){
+    public String syncCallSayHello(){
         UserService service = retrofit.create(UserService.class);
-        Call<JsonObject> callSync = service.sayHello();
-
+        Call<ResponseBody> callSync = service.sayHello();
+        String serverResponse;
         try {
-            Response<JsonObject> response = callSync.execute();
-            JsonObject string = response.body();
-            return string;
+            Response<ResponseBody> response = callSync.execute();
+            byte[] responseBodyBytes = response.body().bytes();
+            Gson gson = new Gson();
+            serverResponse = gson.fromJson(new String(responseBodyBytes), String.class);
+            return serverResponse;
         } catch (Exception ex) {
             ex.printStackTrace();
             return null; }
@@ -185,12 +189,31 @@ public class RetrofitBuilder {
         }
     }
 
+    public Messages syncCallConnect(ConnectRequest connectRequest) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callConnect = service.connect(connectRequest, Cookies.getSessionToken());
+        Messages serverResponse;
+        try {
+            Response<ResponseBody> response = callConnect.execute();
+            byte[] responseBodyBytes = response.body().bytes();
+            Gson gson = new Gson();
+            serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+
+            return serverResponse;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+
+    }
+
     //TODO add size limit to uploaded files
     //TODO filenames
     public void asyncCallUpload(String filePath) {
         File file = new File(filePath);
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", FileController.generateFileName() + FilenameUtils.getExtension(file.getName()), requestFile);
 
 
         UserService service = retrofit.create(UserService.class);

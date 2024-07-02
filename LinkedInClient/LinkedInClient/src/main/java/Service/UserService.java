@@ -18,7 +18,7 @@ public interface UserService {
 
     //test endpoint
     @GET("/hello")
-    public Call<JsonObject> sayHello();
+    public Call<ResponseBody> sayHello();
 
     @GET("/users")
     public Call<List<User>> getUsers();
@@ -48,6 +48,9 @@ public interface UserService {
     @Streaming
     @GET("/files/{filename}")
     Call<ResponseBody> downloadFile(@Path("filename") String filename);
+
+    @POST("/connect")
+    Call<ResponseBody> connect(@Body ConnectRequest connectRequest, @Header("sessionToken") String sessionToken);
 
     @POST("/acceptConnection")
     Call<ResponseBody> acceptConnection(@Body AcceptConnection acceptConnection, @Header("sessionToken") String sessionToken);

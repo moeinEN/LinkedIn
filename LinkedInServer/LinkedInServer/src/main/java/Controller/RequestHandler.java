@@ -2,9 +2,7 @@ package Controller;
 
 import Database.DatabaseQueryController;
 import Model.*;
-import Model.Requests.LoginCredentials;
-import Model.Requests.RegisterCredentials;
-import Model.Requests.WatchProfileRequest;
+import Model.Requests.*;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -34,14 +32,13 @@ public class RequestHandler {
     public static void helloHandler(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
             System.out.println("got it");
-            JSONObject json = new JSONObject();
+            String response;
             try {
-                json.put("Message","Hello, received your GET request!");
-            } catch (JSONException e) {
+                response = "Hello, received your GET request!";
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            String jsonResponse = json.toString();
-            byte[] responseBytes = jsonResponse.getBytes("UTF-8");
+            byte[] responseBytes = response.getBytes("UTF-8");
             exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
             exchange.sendResponseHeaders(200, responseBytes.length); // use the actual length of the response body
             try (OutputStream os = exchange.getResponseBody()) {
@@ -177,6 +174,162 @@ public class RequestHandler {
                         recievedProfile = gson.fromJson(reader, Profile.class);
                         try {
                             DatabaseQueryController.insertProfile(recievedProfile, userId);
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
+            }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    public static void likeHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    LikeRequest likeRequest = null;
+                    try {
+                        likeRequest = gson.fromJson(reader, LikeRequest.class);
+                        try {
+                            DatabaseQueryController.insertLike(likeRequest, userId);
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
+            }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    public static void commentHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    CommentRequest commentRequest = null;
+                    try {
+                        commentRequest = gson.fromJson(reader, CommentRequest.class);
+                        try {
+                            DatabaseQueryController.insertComment(commentRequest, userId);
+                            response = SUCCESS.toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            response = INTERNAL_ERROR.toByte("UTF-8");
+                            responseCode = INTERNAL_ERROR.getStatusCode();
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        response = BAD_REQUEST.toByte("UTF-8");
+                        responseCode = BAD_REQUEST.getStatusCode();
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
+            }
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        } else {
+            byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
+            exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
+        }
+    }
+    public static void connectHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                response = UNAUTHORIZED.toByte("UTF-8");
+                responseCode = UNAUTHORIZED.getStatusCode();
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    ConnectRequest connectRequest = null;
+                    try {
+                        connectRequest = gson.fromJson(reader, ConnectRequest.class);
+                        try {
+                            DatabaseQueryController.insertPendingConnect(userId, connectRequest);
                             response = SUCCESS.toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
                         } catch (SQLException exception) {

@@ -69,6 +69,28 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/like", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.likeHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/comment", new com.sun.net.httpserver.HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.commentHandler(exchange);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         server.createContext("/user/profile", new com.sun.net.httpserver.HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
                 try {
