@@ -28,22 +28,29 @@ public class Main {
         //DatabaseQueryController.createTableUsers();
 
         //Create HTTP server listening on port 8080
-//        createTableProfile();
-//        createTableProfileJob();
-//        createTableProfileHeader();
-//        createTableProfileEducation();
-//        createTableProfileContactsInfo();
-//        createTableCertificate();
-//        createTableComment();
-//        createTableLike();
-//        createTablePost();
-//        createTableConnections();
-//        createTableProfileSports();
-//        createTableProfileVoluntaryActivities();
-//        createTableProfileExperience();
-//        createTableProfileSkills();
-//        createTableProfileOrganizations();
-//
+        createTableUsers();
+        createTableTokens();
+        createTableUserWatchList();
+        createTableConnections();
+        createTablePost();
+        createTableComment();
+        createTableLike();
+        createTablePendingConnect();
+        createTableConnect();
+        createTableFollow();
+        createTableProfile();
+        createTableProfileSports();
+        createTableProfileVoluntaryActivities();
+        createTableProfileExperience();
+        createTableProfileSkills();
+        createTableProfileOrganizations();
+        createTableProfileJob();
+        createTableProfileEducation();
+        createTableProfileContactsInfo();
+        createTableProfileHeader();
+        createTableCertificate();
+
+
 
 
 
