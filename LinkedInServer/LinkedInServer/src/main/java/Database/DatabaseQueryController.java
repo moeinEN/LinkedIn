@@ -396,7 +396,7 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
+    public static WatchPostSearchResults getPostBySearch(SearchPostsRequest searchPostsRequest) throws SQLException {
         String sql = "SELECT * FROM POST WHERE caption like ? OR hashtag like ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
@@ -497,9 +497,9 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public static WatchConnectionPendingLists selectPendingConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+    public static WatchConnectionPendingLists selectPendingConnectionList(WatchPendingConnectionListRequest watchPendingConnectionListRequest) throws SQLException {
         String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
-        int receiverId = watchConnectionListRequest.getMyProfileId();
+        int receiverId = watchPendingConnectionListRequest.getMyProfileId();
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -521,6 +521,31 @@ public class DatabaseQueryController {
         }
         return new WatchConnectionPendingLists();
     }
+    public static WatchConnectionListResponse selectConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+        String sql = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
+        int receiverId = watchConnectionListRequest.getMyProfileId();
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, receiverId);
+            ResultSet rs = pstmt.executeQuery();
+            WatchConnectionListResponse watchConnectionListResponse = new WatchConnectionListResponse();
+            while (rs.next()) {
+                int senderId = rs.getInt("specifiedSenderId");
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+                if (Objects.nonNull(miniProfile)) {
+                    watchConnectionListResponse.getConnectionList().add(miniProfile);
+                }
+            }
+            conn.commit();
+            return watchConnectionListResponse;
+        } catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+        }
+        return new WatchConnectionListResponse();
+    }
+
     public static void acceptOrDeclineConnection(int receiverId, AcceptConnection acceptConnection) throws SQLException {
         String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();

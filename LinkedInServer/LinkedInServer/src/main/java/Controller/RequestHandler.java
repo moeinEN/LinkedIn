@@ -1,8 +1,10 @@
 package Controller;
 
 import Database.DatabaseQueryController;
+import Database.DbController;
 import Model.*;
 import Model.Requests.*;
+import Model.Response.WatchProfileSearchResults;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -142,7 +144,6 @@ public class RequestHandler {
             byte[] responseBytes = response.getBytes("UTF-8");
             exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
             exchange.sendResponseHeaders(responseCode, responseBytes.length); // use the actual length of the response body
-
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(responseBytes);
             }
@@ -310,7 +311,7 @@ public class RequestHandler {
             }
         }
     }
-    public static void connectHandler(HttpExchange exchange) throws IOException, SQLException {
+    public static void connectRequestHandler(HttpExchange exchange) throws IOException, SQLException {
         if ("POST".equals(exchange.getRequestMethod())) {
             byte[] response;
             int responseCode;
@@ -429,8 +430,8 @@ public class RequestHandler {
             exchange.sendResponseHeaders(405, -1); // 405 Method Not Allowed
         }
     }
-    public static void watchProfile(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+    public static void acceptConnectionHandler(HttpExchange exchange) throws IOException, SQLException {
+        if ("POST".equals(exchange.getRequestMethod())) {
             byte[] response;
             int responseCode;
 
@@ -444,14 +445,14 @@ public class RequestHandler {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
-                    WatchProfileRequest watchProfileRequest = null;
+                    AcceptConnection acceptConnection = null;
                     try {
-                        watchProfileRequest = gson.fromJson(reader, WatchProfileRequest.class);
+                        acceptConnection = gson.fromJson(reader, AcceptConnection.class);
                         try {
-
+                            DatabaseQueryController.acceptOrDeclineConnection(userId, acceptConnection);
                             response = SUCCESS.toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
-                        } catch (Exception exception) {
+                        } catch (SQLException exception) {
                             exception.printStackTrace();
                             response = INTERNAL_ERROR.toByte("UTF-8");
                             responseCode = INTERNAL_ERROR.getStatusCode();
@@ -463,14 +464,237 @@ public class RequestHandler {
                         responseCode = BAD_REQUEST.getStatusCode();
                     }
                 }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    response = BAD_REQUEST.toByte("UTF-8");
+                    responseCode = BAD_REQUEST.getStatusCode();
+                }
             }
-
+            exchange.sendResponseHeaders(responseCode, response.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response);
+            }
         } else {
             byte[] response = METHOD_NOT_ALLOWED.toByte("UTF-8");
             exchange.sendResponseHeaders(METHOD_NOT_ALLOWED.getStatusCode(), response.length); // 405 Method Not Allowed
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response);
             }
+        }
+    }
+    public static void watchProfile(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    WatchProfileRequest watchProfileRequest = null;
+                    try {
+                        watchProfileRequest = gson.fromJson(reader, WatchProfileRequest.class);
+                        try {
+                            response = DatabaseQueryController.getWatchProfileRequest(watchProfileRequest).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
+        }
+    }
+    public static void searchPost(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    SearchPostsRequest searchPostsRequest = null;
+                    try {
+                        searchPostsRequest = gson.fromJson(reader, SearchPostsRequest.class);
+                        try {
+                            response = DatabaseQueryController.getPostBySearch(searchPostsRequest).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
+        }
+    }
+    public static void searchProfile(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    SearchProfileRequest searchProfileRequest = null;
+                    try {
+                        searchProfileRequest = gson.fromJson(reader, SearchProfileRequest.class);
+                        try {
+                            response = DatabaseQueryController.getWatchProfileSearchResults(searchProfileRequest).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
+        }
+    }
+    public static void watchConnections(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    WatchConnectionListRequest watchConnectionListRequest = null;
+                    try {
+                        watchConnectionListRequest = gson.fromJson(reader, WatchConnectionListRequest.class);
+                        try {
+                            response = DatabaseQueryController.selectConnectionList(watchConnectionListRequest).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
+        }
+    }
+    public static void watchPendingConnections(HttpExchange exchange) throws IOException, SQLException {
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+            byte[] response;
+            int responseCode;
+
+            Headers requestHeaders = exchange.getRequestHeaders();
+            int userId = JwtHandler.validateSessionToken(requestHeaders);
+            if(userId == -1) {
+                exchange.sendResponseHeaders(401, -1); // 401 unauthorized
+                return;
+            }
+            else {
+                try (InputStream requestBody = exchange.getRequestBody();
+                     InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
+                    Gson gson = new Gson();
+                    WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
+                    try {
+                        watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
+                        try {
+                            response = DatabaseQueryController.selectPendingConnectionList(watchPendingConnectionListRequest).toByte("UTF-8");
+                            responseCode = SUCCESS.getStatusCode();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            exchange.sendResponseHeaders(400, -1); // 400 bad request
+                            return;
+                        }
+                    }
+                    catch (IllegalArgumentException e) {
+                        logger.info(e.getMessage());
+                        exchange.sendResponseHeaders(400, -1); // 400 bad request
+                        return;
+                    }
+                }
+                exchange.sendResponseHeaders(responseCode, response.length); // use the actual length of the response body
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response);
+                }
+            }
+        } else {
+            exchange.sendResponseHeaders(405, -1); // 405 method not-allowed
+            return;
         }
     }
 }
