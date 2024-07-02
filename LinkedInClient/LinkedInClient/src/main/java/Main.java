@@ -1,7 +1,7 @@
 import Controller.RetrofitBuilder;
+import Controller.SignUpController;
 import Model.*;
-import Model.Requests.LoginCredentials;
-import Model.Requests.CreateProfileRequest;
+import Model.Requests.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,34 +18,52 @@ public class Main {
 //        System.out.println(retrofitBuilder.syncCallGetUser().toString());
 //
 //        Messages signUpMessages = null;
-//        if((signUpMessages = SignUpController.validateUserData("mmd23@yahoo.com", "tEST@123", "tEST@123", "Goostavo")) == Messages.SUCCESS) {
-//            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("mmd23@yahoo.com", "tEST@123", "tEST@123", "Goostavo")).message);
+//        if((signUpMessages = SignUpController.validateUserData("mmd23@yahoo.com", "tEST@123", "tEST@123",
+//                "Goostavo")) == Messages.SUCCESS) {
+//            RegisterCredentials registerCredentials = new RegisterCredentials("mmd23@yahoo.com", "tEST@123", "tEST@123", "Goostavo");
+//            System.out.println(retrofitBuilder.syncCallSignUp(registerCredentials).getMessage());
 //        }
 //        else {
-//            System.out.println(signUpMessages.message);
+//            System.out.println(signUpMessages.getMessage());
 //        }
 //
-//        if((signUpMessages = SignUpController.validateUserData("whatthehell@yahoo.com", "teteEST@123", "teteEST@123", "testProject")) == Messages.SUCCESS) {
-//            System.out.println(retrofitBuilder.syncCallSignUp(SignUpController.newUser("whatthehell@yahoo.com", "teteEST@123", "teteEST@123", "testProject")).message);
+//        if((signUpMessages = SignUpController.validateUserData("whatthehell@yahoo.com", "teteEST@123",
+//                "teteEST@123", "testProject")) == Messages.SUCCESS) {
+//            RegisterCredentials registerCredentials = new RegisterCredentials("whatthehell@yahoo.com", "teteEST@123", "teteEST@123", "testProject");
+//            System.out.println(retrofitBuilder.syncCallSignUp(registerCredentials).getMessage());
 //        }
 //        else {
-//            System.out.println(signUpMessages.message);
+//            System.out.println(signUpMessages.getMessage());
 //        }
 
 
-        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+//        LoginCredentials loginCredentials = new LoginCredentials("Goostavo", "tEST@123");
+//        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+//        System.out.println(loginResp.getMessage());
+//        System.out.println(Cookies.getSessionToken());
+
+
+        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
         Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+        System.out.println(loginResp.getMessage());
         System.out.println(Cookies.getSessionToken());
 
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
-//        ProfileJob profileJob = new ProfileJob("Java Developer", JobStatus.FULL_TIME, "Behsa",
+//        ProfileJob profileJob = new ProfileJob("Specialist", JobStatus.FULL_TIME, "Behsa",
 //                "Tehran", JobWorkplaceStatus.ON_SITE, true,
 //                new SimpleDateFormat("yyyy-MM").parse("2023-11"),
 //                new SimpleDateFormat("yyyy-MM").parse("2024-12"),
-//                false, "Salooom", Arrays.asList(JobSkills.EMPTY),
-//                false, false);
+//                false, "Salooom", Arrays.asList(JobSkills.ARCHITECTURE, JobSkills.CAD, JobSkills.CHANGE_MANAGEMENT),
+//                false, true);
 //        jobs.add(profileJob);
+//        ProfileJob profileJob2 = new ProfileJob("Android Developer", JobStatus.INTERNSHIP, "MCI",
+//                "Tehran", JobWorkplaceStatus.REMOTE, true,
+//                new SimpleDateFormat("yyyy-MM").parse("2022-11"),
+//                new SimpleDateFormat("yyyy-MM").parse("2023-11"),
+//                false, "Salooom", Arrays.asList(JobSkills.CLOUD_COMPUTING, JobSkills.DEVOPS),
+//                false, false);
+//        jobs.add(profileJob2);
 //        List<ProfileVoluntaryActivities> voluntaryActivities = new ArrayList<>();
 //        ProfileVoluntaryActivities profileVoluntaryActivities = new ProfileVoluntaryActivities("charity",
 //                new SimpleDateFormat("yyyy-MM").parse("2023-11"));
@@ -61,24 +79,33 @@ public class Main {
 //                ceoExperienceDate, profileSports);
 //
 //        List<ProfileEducation> profileEducations = new ArrayList<>();//############################################
-//        ProfileEducation profileEducation = new ProfileEducation("Mehr Avval", new SimpleDateFormat("yyyy-MM").parse("2024-12")
-//                ,new SimpleDateFormat("yyyy-MM").parse("2025-01"), false, "15.3", "modir majale", "yo", Arrays.asList(EducationalSkills.EMPTY),
+//        ProfileEducation profileEducation = new ProfileEducation("Mehr Avval",
+//                new SimpleDateFormat("yyyy-MM").parse("2024-12")
+//                ,new SimpleDateFormat("yyyy-MM").parse("2025-01"), false,
+//                "15.3", "modir majale", "yo", Arrays.asList(EducationalSkills.EDUCATION),
 //                false, false);
-//        ProfileEducation profileEducation2 = new ProfileEducation("Mehr Avval", new SimpleDateFormat("yyyy-MM").parse("2024-12")
-//                ,new SimpleDateFormat("yyyy-MM").parse("2025-01"), false, "15.3", "modir majale", "yo", Arrays.asList(EducationalSkills.EMPTY),
+//        ProfileEducation profileEducation2 = new ProfileEducation("Mehr Akhar",
+//                new SimpleDateFormat("yyyy-MM").parse("2024-12")
+//                ,new SimpleDateFormat("yyyy-MM").parse("2025-01"),
+//                false, "15.3", "modir majale",
+//                "yo", Arrays.asList(EducationalSkills.BIOLOGY, EducationalSkills.ACCOUNTING),
 //                false, true);
 //        profileEducations.add(profileEducation);
 //
 //        List<Certificate> certificates = new ArrayList<>();//#####################################
-//        Certificate certificate = new Certificate("Pro Player G+", "ESL", new SimpleDateFormat("yyyy-MM").parse("2023-01"),
-//                new SimpleDateFormat("yyyy-MM").parse("2023-04"), "UCL 22-12", "www.sex.com", Arrays.asList("Sex","Aim"));
+//        Certificate certificate = new Certificate("Pro Player AAAAA+", "ESL",
+//                new SimpleDateFormat("yyyy-MM").parse("2023-01"),
+//                new SimpleDateFormat("yyyy-MM").parse("2023-04"), "UCL 22-12",
+//                "www.sex.com", Arrays.asList("Sex","Aim","Gay"));
 //        certificates.add(certificate);
 //
-//        ProfileJob currentJob = new ProfileJob("Java Developer", JobStatus.FULL_TIME, "Behsa",
-//                "Tehran", JobWorkplaceStatus.ON_SITE, true,
+//        ProfileJob currentJob = new ProfileJob("Sex Developer", JobStatus.FULL_TIME,
+//                "Behsa2",
+//                "Tehran", JobWorkplaceStatus.ON_SITE,
+//                true,
 //                new SimpleDateFormat("yyyy-MM").parse("2024-11"),
 //                null,
-//                true, "Salooom", Arrays.asList(JobSkills.EMPTY),
+//                true, "Salooom", Arrays.asList(JobSkills.ARCHITECTURE, JobSkills.CAD, JobSkills.CHANGE_MANAGEMENT),
 //                false, true);
 //        ProfileContactInfo profileContactInfo = new ProfileContactInfo("aaa.aaa.com", "a@A.com", "0912", PhoneType.MOBILE_PHONE,
 //                "saghez", new SimpleDateFormat("yyyy-MM").parse("2004-11"), ShowBirthDateTo.ALL, "tel.me/lesbian");
@@ -86,8 +113,8 @@ public class Main {
 //                "Iran", "Karaj", "Engineer", profileContactInfo, "Sexy"); //#################
 //
 //
-//        ProfileSkills profileSkills = new ProfileSkills(Arrays.asList(JobSkills.EMPTY), Arrays.asList(EducationalSkills.EMPTY)); //######
-//        ProfileOrganizations profileOrganizations = new ProfileOrganizations("Brazzers", "actor", new SimpleDateFormat("yyyy-MM").parse("2024-11"), null, true);
+//        ProfileSkills profileSkills = new ProfileSkills(Arrays.asList(JobSkills.DEVOPS, JobSkills.CLOUD_COMPUTING), Arrays.asList(EducationalSkills.DESIGN, EducationalSkills.BIOLOGY)); //######
+//        ProfileOrganizations profileOrganizations = new ProfileOrganizations("OnlyFans", "actor", new SimpleDateFormat("yyyy-MM").parse("2024-11"), null, true);
 //
 //
 //
@@ -96,6 +123,11 @@ public class Main {
 //        System.out.println(makeProfile.getMessage());
 
 //        retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
-        retrofitBuilder.asyncCallDownload("test2.mp4");
+//        retrofitBuilder.asyncCallDownload("test2.mp4");
+
+        SearchProfileRequest searchProfileRequest = new SearchProfileRequest("Moein",null,"Tehran",null,null,null,null);
+
+        //ConnectRequest connectRequest = new ConnectRequest(1,);
+
     }
 }
