@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
+import java.util.Random;
 
 public class FileController {
 
@@ -41,5 +43,10 @@ public class FileController {
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public static String generateFileName(){
+        Random random = new Random();
+        return random.nextInt(99999) + "_" + System.currentTimeMillis();
     }
 }
