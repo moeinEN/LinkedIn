@@ -54,5 +54,4 @@ public interface UserService {
 
     @POST("/watchProfile")
     Call<ResponseBody> watchProfile(@Body WatchProfileRequest watchProfile, @Header("sessionToken") String sessionToken);
-
 }

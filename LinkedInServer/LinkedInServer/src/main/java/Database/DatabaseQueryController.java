@@ -1300,5 +1300,4 @@ public class DatabaseQueryController {
         }
         return null;
     }
-
 }
