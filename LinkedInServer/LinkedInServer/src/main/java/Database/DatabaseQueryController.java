@@ -463,13 +463,13 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
-    public static void insertPendingConnect(int receiverId, ConnectRequest connectRequest) throws SQLException {
+    public static void insertPendingConnect(int senderId, ConnectRequest connectRequest) throws SQLException {
         String sql = "INSERT INTO Pending (specifiedSenderId, specifiedReceiverId, note) VALUES (?, ?, ?)";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            int senderId = connectRequest.getIdentificationCode();
+            int receiverId = connectRequest.getIdentificationCode();
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
             pstmt.setString(3, connectRequest.getNote());
