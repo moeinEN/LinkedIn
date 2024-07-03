@@ -1,13 +1,9 @@
-package Model.Response;
+package Model;
 
-import Model.ConnectionPendingObject;
-import Model.Messages;
-import Model.MiniProfile;
 import com.google.gson.Gson;
 import lombok.*;
 
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 
 import static Model.Messages.INTERNAL_ERROR;
 
@@ -16,8 +12,9 @@ import static Model.Messages.INTERNAL_ERROR;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class WatchConnectionPendingLists {
-    HashMap<Integer, ConnectionPendingObject> pendingLists = new HashMap<>();
+public class ConnectionPendingObject {
+    private MiniProfile miniProfile;
+    private String note;
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
         Gson gson = new Gson();

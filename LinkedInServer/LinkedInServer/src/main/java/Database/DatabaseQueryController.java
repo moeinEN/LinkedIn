@@ -120,7 +120,7 @@ public class DatabaseQueryController {
             Connection db = null;
             Statement stmt = null;
             db = DbController.getConnection();
-            db.setAutoCommit(true);
+            db.setAutoCommit(false);
             stmt = db.createStatement();
 
             String usernameCheckSql = String.format("SELECT * FROM USER WHERE username = '%s'", username);
@@ -139,9 +139,11 @@ public class DatabaseQueryController {
 
             try {
                 stmt.executeUpdate(sql);
+                db.commit();
                 return Messages.SUCCESS;
             } catch ( Exception e ) {
                 e.printStackTrace();
+                db.rollback();
                 return Messages.INTERNAL_ERROR;
             } finally {
                 stmt.close();
@@ -362,7 +364,8 @@ public class DatabaseQueryController {
             Like like = new Like();
             while (rs.next()) {
                 int userId = rs.getInt("specifiedUserId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
+                int profileId = getProfileIdFromUserId(conn, userId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
                 like.getLikedUsers().add(miniProfile);
             }
             return like;
@@ -381,13 +384,15 @@ public class DatabaseQueryController {
                 int userId = rs.getInt("specifiedUserId");
                 int commentId = rs.getInt("id");
                 String commentText = rs.getString("comment");
-                MiniProfile miniProfile = getUserMiniProfile(conn, userId);
-                if (comment.getCommentedUsers().containsKey(miniProfile)){
-                    comment.getCommentedUsers().get(miniProfile).put(commentId, commentText);
+                int profileId = getProfileIdFromUserId(conn, userId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
+                if (comment.getCommentedUsers().containsKey(profileId)){
+                    comment.getCommentedUsers().get(profileId).getComments().put(commentId, commentText);
                 } else {
-                    HashMap<Integer, String> temp = new HashMap<>();
-                    temp.put(commentId, commentText);
-                    comment.getCommentedUsers().put(miniProfile, temp);
+                    CommentIndividual commentIndividual = new CommentIndividual();
+                    commentIndividual.getComments().put(commentId, commentText);
+                    commentIndividual.setMiniProfile(miniProfile);
+                    comment.getCommentedUsers().put(profileId, commentIndividual);
                 }
             }
             return comment;
@@ -469,7 +474,7 @@ public class DatabaseQueryController {
         conn.setAutoCommit(false);
         PreparedStatement pstmt = conn.prepareStatement(sql);
         try {
-            int receiverId = connectRequest.getIdentificationCode();
+            int receiverId = getUserIdFromProfileId(conn, connectRequest.getIdentificationCode());
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
             pstmt.setString(3, connectRequest.getNote());
@@ -478,6 +483,7 @@ public class DatabaseQueryController {
         }
         catch (Exception e) {
             e.printStackTrace();
+            conn.rollback();
             throw e;
         }
     }
@@ -497,9 +503,8 @@ public class DatabaseQueryController {
             throw e;
         }
     }
-    public static WatchConnectionPendingLists selectPendingConnectionList(WatchPendingConnectionListRequest watchPendingConnectionListRequest) throws SQLException {
-        String sql = "SELECT * FROM PENDING WHERE specifiedReceiverId = ?";
-        int receiverId = watchPendingConnectionListRequest.getMyProfileId();
+    public static WatchConnectionPendingLists selectPendingConnectionList(int receiverId) throws SQLException {
+        String sql = "SELECT * FROM Pending WHERE specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -508,9 +513,12 @@ public class DatabaseQueryController {
             WatchConnectionPendingLists watchConnectionPendingLists = new WatchConnectionPendingLists();
             while (rs.next()) {
                 int senderId = rs.getInt("specifiedSenderId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+                int profileId = getProfileIdFromUserId(conn, senderId);
+                String note = rs.getString("note");
+                MiniProfile miniProfile = getUserMiniProfile(conn, profileId);
                 if (Objects.nonNull(miniProfile)) {
-                    watchConnectionPendingLists.getPendingLists().put(miniProfile, miniProfile.getFirstName() + " " + miniProfile.getLastName());
+                    ConnectionPendingObject connectionPendingObject = new ConnectionPendingObject(miniProfile, note);
+                    watchConnectionPendingLists.getPendingLists().put(profileId, connectionPendingObject);
                 }
             }
             conn.commit();
@@ -532,7 +540,8 @@ public class DatabaseQueryController {
             WatchConnectionListResponse watchConnectionListResponse = new WatchConnectionListResponse();
             while (rs.next()) {
                 int senderId = rs.getInt("specifiedSenderId");
-                MiniProfile miniProfile = getUserMiniProfile(conn, senderId);
+                int senderProfileId = getProfileIdFromUserId(conn, senderId);
+                MiniProfile miniProfile = getUserMiniProfile(conn, senderProfileId);
                 if (Objects.nonNull(miniProfile)) {
                     watchConnectionListResponse.getConnectionList().add(miniProfile);
                 }
@@ -1331,5 +1340,37 @@ public class DatabaseQueryController {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static int getUserIdFromProfileId(Connection conn, int profileId) throws SQLException {
+        String sql = "SELECT * FROM Profile WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, profileId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("userId");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return 0;
+    }
+
+    public static int getProfileIdFromUserId(Connection conn, int userId) throws SQLException {
+        String sql = "SELECT * FROM Profile WHERE userId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return 0;
     }
 }

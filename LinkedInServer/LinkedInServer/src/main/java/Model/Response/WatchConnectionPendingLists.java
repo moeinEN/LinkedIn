@@ -1,5 +1,6 @@
 package Model.Response;
 
+import Model.ConnectionPendingObject;
 import Model.Messages;
 import Model.MiniProfile;
 import com.google.gson.Gson;
@@ -16,7 +17,7 @@ import static Model.Messages.INTERNAL_ERROR;
 @AllArgsConstructor
 @ToString
 public class WatchConnectionPendingLists {
-    HashMap<MiniProfile, String> pendingLists;
+    HashMap<Integer, ConnectionPendingObject> pendingLists = new HashMap<>();
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
         Gson gson = new Gson();

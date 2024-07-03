@@ -345,9 +345,9 @@ public class RetrofitBuilder {
         }
     }
 
-    public WatchConnectionPendingLists watchConnectionPendingLists(WatchPendingConnectionListRequest watchPendingConnectionListRequest) {
+    public WatchConnectionPendingLists watchConnectionPendingLists() {
         UserService service = retrofit.create(UserService.class);
-        Call<ResponseBody> callWatchConnectionPendingLists = service.watchPendingConnections(watchPendingConnectionListRequest, Cookies.getSessionToken());
+        Call<ResponseBody> callWatchConnectionPendingLists = service.watchPendingConnections(Cookies.getSessionToken());
         WatchConnectionPendingLists ServerResponse;
         try {
             Response<ResponseBody> response = callWatchConnectionPendingLists.execute();

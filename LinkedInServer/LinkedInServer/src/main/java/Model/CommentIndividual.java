@@ -1,8 +1,5 @@
-package Model.Response;
+package Model;
 
-import Model.ConnectionPendingObject;
-import Model.Messages;
-import Model.MiniProfile;
 import com.google.gson.Gson;
 import lombok.*;
 
@@ -11,13 +8,15 @@ import java.util.HashMap;
 
 import static Model.Messages.INTERNAL_ERROR;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class WatchConnectionPendingLists {
-    HashMap<Integer, ConnectionPendingObject> pendingLists = new HashMap<>();
+public class CommentIndividual {
+    private HashMap<Integer, String> comments = new HashMap<>();
+    private MiniProfile miniProfile;
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
         Gson gson = new Gson();

@@ -66,6 +66,6 @@ public interface UserService {
     @POST("/watchConnections")
     Call<ResponseBody> watchConnections(@Body WatchConnectionListRequest watchConnectionListRequest, @Header("sessionToken") String sessionToken);
 
-    @POST("/watchPendingConnections")
-    Call<ResponseBody> watchPendingConnections(@Body WatchPendingConnectionListRequest watchPendingConnectionListRequest, @Header("sessionToken") String sessionToken);
+    @GET("/watchPendingConnections")
+    Call<ResponseBody> watchPendingConnections(@Header("sessionToken") String sessionToken);
 }

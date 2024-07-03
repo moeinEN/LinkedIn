@@ -397,7 +397,7 @@ public class RequestHandler {
         }
     }
     public static void downloadHandler(HttpExchange exchange) throws IOException, SQLException {
-        if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             // Extract file name from the request URI
             String requestedFile = exchange.getRequestURI().getPath().replace("/files/", "");
             Path filePath = Paths.get("src/main/resources/testUpload", requestedFile);
@@ -483,7 +483,7 @@ public class RequestHandler {
         }
     }
     public static void watchProfile(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -526,7 +526,7 @@ public class RequestHandler {
         }
     }
     public static void searchPost(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -569,7 +569,7 @@ public class RequestHandler {
         }
     }
     public static void searchProfile(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -612,7 +612,7 @@ public class RequestHandler {
         }
     }
     public static void watchConnections(HttpExchange exchange) throws IOException, SQLException {
-        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -669,11 +669,11 @@ public class RequestHandler {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
-                    WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
+                    //WatchPendingConnectionListRequest watchPendingConnectionListRequest = null;
                     try {
-                        watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
+                        //watchPendingConnectionListRequest = gson.fromJson(reader, WatchPendingConnectionListRequest.class);
                         try {
-                            response = DatabaseQueryController.selectPendingConnectionList(watchPendingConnectionListRequest).toByte("UTF-8");
+                            response = DatabaseQueryController.selectPendingConnectionList(userId).toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
                         } catch (Exception exception) {
                             exception.printStackTrace();

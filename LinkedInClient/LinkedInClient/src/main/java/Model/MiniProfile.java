@@ -1,8 +1,12 @@
 package Model;
 
+import com.google.gson.Gson;
 import lombok.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Objects;
+
+import static Model.Messages.INTERNAL_ERROR;
 
 @Getter
 @Setter
@@ -14,17 +18,4 @@ public class MiniProfile {
     private String lastName;
     private String imageURL;
     private int identification;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MiniProfile that = (MiniProfile) o;
-        return identification == that.identification;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(identification);
-    }
 }

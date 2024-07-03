@@ -9,5 +9,6 @@ import java.util.HashMap;
 @AllArgsConstructor
 @ToString
 public class Comment {
-    private HashMap<MiniProfile, HashMap<Integer, String>> commentedUsers = new HashMap<>();
+    private HashMap<Integer, CommentIndividual> commentedUsers = new HashMap<>();
 }
+
