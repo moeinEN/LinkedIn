@@ -2,6 +2,7 @@ import Controller.RetrofitBuilder;
 import Controller.SignUpController;
 import Model.*;
 import Model.Requests.*;
+import Model.Response.WatchConnectionListResponse;
 import Model.Response.WatchConnectionPendingLists;
 import Model.Response.WatchProfileSearchResults;
 
@@ -132,10 +133,18 @@ public class Main {
 //        System.out.println(watchProfileSearchResults);
 //        ConnectRequest connectRequest = new ConnectRequest(2, "Be man accept Bedahid");
 //        Messages messages = retrofitBuilder.syncCallConnect(connectRequest);
-        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
-        System.out.println(watchConnectionPendingLists.toString());
+//        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
+//        System.out.println(watchConnectionPendingLists.toString());
+//        WatchConnectionListResponse watchConnectionListResponse = retrofitBuilder.watchConnectionListResponse();
+//        System.out.println(watchConnectionListResponse.toString());
 
-        AcceptConnection acceptConnection = new AcceptConnection(false, 1);
+//        AcceptConnection acceptConnection = new AcceptConnection(true, 1);
+//        Messages messages = retrofitBuilder.acceptConnection(acceptConnection);
+//        System.out.println(messages.toString());
+//        WatchConnectionListResponse watchConnectionListResponse = retrofitBuilder.watchConnectionListResponse();
+//        System.out.println(watchConnectionListResponse.toString());
+//        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
+//        System.out.println(watchConnectionPendingLists.toString());
 
     }
 }

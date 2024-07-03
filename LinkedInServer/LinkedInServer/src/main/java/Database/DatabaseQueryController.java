@@ -529,9 +529,8 @@ public class DatabaseQueryController {
         }
         return new WatchConnectionPendingLists();
     }
-    public static WatchConnectionListResponse selectConnectionList(WatchConnectionListRequest watchConnectionListRequest) throws SQLException {
+    public static WatchConnectionListResponse selectConnectionList(int receiverId) throws SQLException {
         String sql = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
-        int receiverId = watchConnectionListRequest.getMyProfileId();
         Connection conn = DbController.getConnection();
         conn.setAutoCommit(false);
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -567,9 +566,11 @@ public class DatabaseQueryController {
             if (acceptConnection.getAcceptOrDecline()){
                 addConnectionToUser(conn, senderId, receiverId);
             }
+            conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
             conn.rollback();
+            throw e;
         }
     }
     public static void addConnectionToUser(Connection conn, int senderId, int receiverId) throws SQLException {
@@ -1081,13 +1082,16 @@ public class DatabaseQueryController {
 
     public static WatchProfileResponse getWatchProfileRequest(WatchProfileRequest watchProfileRequest) throws SQLException {
         Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
         ProfileExperience profileExperience = getProfileExperience(conn, watchProfileRequest.getProfileId());
         List<ProfileEducation> profileEducations = getProfileEducation(conn, watchProfileRequest.getProfileId(), false);
         List<Certificate> certificates = getCertificate(conn, watchProfileRequest.getProfileId());
         ProfileHeader profileHeader = getProfileHeader(conn, watchProfileRequest.getProfileId());
         ProfileSkills profileSkills = getProfileSkills(conn, watchProfileRequest.getProfileId());
         ProfileOrganizations profileOrganizations = getProfileOrganization(conn, watchProfileRequest.getProfileId());
-        WatchProfileResponse profileToWatch = new WatchProfileResponse(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations, watchProfileRequest.getProfileId(), null);
+        int userId = getUserIdFromProfileId(conn, watchProfileRequest.getProfileId());
+        Feed feed = getFeed(userId);
+        WatchProfileResponse profileToWatch = new WatchProfileResponse(profileExperience, profileEducations, certificates, profileHeader, profileSkills, profileOrganizations, watchProfileRequest.getProfileId(), feed);
         conn.close();
         return profileToWatch;
     }
@@ -1373,4 +1377,38 @@ public class DatabaseQueryController {
         }
         return 0;
     }
+
+    public static Feed getFeed(int userId) throws SQLException {
+        String sql = "SELECT * FROM POST WHERE userId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            Feed feed = new Feed();
+            while (rs.next()) {
+                Post post = new Post();
+                int postId = rs.getInt("id");
+                String caption = rs.getString("caption");
+                String[] hashtags = rs.getString("hashtag").split(",");
+                List<String> hashtagList = new ArrayList<>(Arrays.asList(hashtags));
+                Like like = getLikes(conn, postId);
+                Comment comment = getComments(conn, postId);
+                post.setComments(comment);
+                post.setText(caption);
+                post.setLikes(like);
+                post.setIdentification(postId);
+                post.setHashtags(hashtagList);
+                feed.getPosts().add(post);
+            }
+            conn.commit();
+            return feed;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            conn.rollback();
+            throw e;
+        }
+    }
+
 }

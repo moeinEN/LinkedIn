@@ -63,8 +63,8 @@ public interface UserService {
     @POST("/searchProfile")
     Call<ResponseBody> searchProfile(@Body SearchProfileRequest searchProfileRequest, @Header("sessionToken") String sessionToken);
 
-    @POST("/watchConnections")
-    Call<ResponseBody> watchConnections(@Body WatchConnectionListRequest watchConnectionListRequest, @Header("sessionToken") String sessionToken);
+    @GET("/watchConnections")
+    Call<ResponseBody> watchConnections(@Header("sessionToken") String sessionToken);
 
     @GET("/watchPendingConnections")
     Call<ResponseBody> watchPendingConnections(@Header("sessionToken") String sessionToken);

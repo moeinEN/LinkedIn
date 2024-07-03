@@ -324,9 +324,9 @@ public class RetrofitBuilder {
         }
     }
 
-    public WatchConnectionListResponse watchConnectionListResponse(SearchProfileRequest searchProfileRequest) {
+    public WatchConnectionListResponse watchConnectionListResponse() {
         UserService service = retrofit.create(UserService.class);
-        Call<ResponseBody> callWatchConnectionList = service.searchProfile(searchProfileRequest, Cookies.getSessionToken());
+        Call<ResponseBody> callWatchConnectionList = service.watchConnections(Cookies.getSessionToken());
         WatchConnectionListResponse ServerResponse;
         try {
             Response<ResponseBody> response = callWatchConnectionList.execute();

@@ -612,7 +612,7 @@ public class RequestHandler {
         }
     }
     public static void watchConnections(HttpExchange exchange) throws IOException, SQLException {
-        if("POST".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
+        if("GET".equalsIgnoreCase(exchange.getRequestMethod())) { // make other method equals check to equalsIgonreCase
             byte[] response;
             int responseCode;
 
@@ -626,11 +626,9 @@ public class RequestHandler {
                 try (InputStream requestBody = exchange.getRequestBody();
                      InputStreamReader reader = new InputStreamReader(requestBody, "UTF-8")) {
                     Gson gson = new Gson();
-                    WatchConnectionListRequest watchConnectionListRequest = null;
                     try {
-                        watchConnectionListRequest = gson.fromJson(reader, WatchConnectionListRequest.class);
                         try {
-                            response = DatabaseQueryController.selectConnectionList(watchConnectionListRequest).toByte("UTF-8");
+                            response = DatabaseQueryController.selectConnectionList(userId).toByte("UTF-8");
                             responseCode = SUCCESS.getStatusCode();
                         } catch (Exception exception) {
                             exception.printStackTrace();

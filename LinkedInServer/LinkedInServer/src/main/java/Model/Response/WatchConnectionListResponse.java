@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import lombok.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static Model.Messages.INTERNAL_ERROR;
@@ -16,7 +17,7 @@ import static Model.Messages.INTERNAL_ERROR;
 @AllArgsConstructor
 @ToString
 public class WatchConnectionListResponse {
-    List<MiniProfile> ConnectionList;
+    List<MiniProfile> ConnectionList = new ArrayList<>();
 
     public byte[] toByte(String charset) throws UnsupportedEncodingException {
         Gson gson = new Gson();
