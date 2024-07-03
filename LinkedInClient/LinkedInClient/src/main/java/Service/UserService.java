@@ -1,5 +1,6 @@
 package Service;
 
+import Model.Post;
 import Model.Requests.*;
 import Model.Response.WatchConnectionPendingLists;
 import Model.User;
@@ -68,4 +69,7 @@ public interface UserService {
 
     @GET("/watchPendingConnections")
     Call<ResponseBody> watchPendingConnections(@Header("sessionToken") String sessionToken);
+
+    @POST("/post")
+    Call<ResponseBody> post(@Body Post post, @Header("sessionToken") String sessionToken);
 }

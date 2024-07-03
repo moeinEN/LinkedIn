@@ -155,6 +155,23 @@ public class RetrofitBuilder {
         }
     }
 
+    public Messages syncCallPost(Post post) {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callPost = service.post(post, Cookies.getSessionToken());
+        Messages ServerResponse;
+        try {
+            Response<ResponseBody> response = callPost.execute();
+            byte[] responseBodeBytes = response.body().bytes();
+            Gson gson = new Gson();
+            ServerResponse = gson.fromJson(new String(responseBodeBytes), Messages.class);
+
+            return ServerResponse;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
     public Messages syncCallComment(CommentRequest comment) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callLike = service.comment(comment, Cookies.getSessionToken());
@@ -192,15 +209,15 @@ public class RetrofitBuilder {
 
     //TODO add size limit to uploaded files
     //TODO filenames
-    public void asyncCallUpload(String filePath) {
+    public String asyncCallUpload(String filePath) {
         File file = new File(filePath);
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", FileController.generateFileName() + FilenameUtils.getExtension(file.getName()), requestFile);
+        String fileURL = FileController.generateFileName() + "." + FilenameUtils.getExtension(file.getName());
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", fileURL, requestFile);
 
 
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> call = service.upload(body);
-        Messages message = null;
         call.enqueue(new retrofit2.Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -216,6 +233,7 @@ public class RetrofitBuilder {
                 throwable.printStackTrace();
             }
         });
+        return fileURL;
     }
 
     public void asyncCallDownload(String filename) {

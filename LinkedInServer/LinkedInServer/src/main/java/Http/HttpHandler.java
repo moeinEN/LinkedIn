@@ -208,6 +208,17 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/post", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.newPost(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
         // Start the server
         server.setExecutor(null); // creates a default executor
         server.start();

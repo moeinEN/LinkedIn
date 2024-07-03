@@ -49,6 +49,7 @@ public class Main {
 //        createTableProfileContactsInfo();
 //        createTableProfileHeader();
 //        createTableCertificate();
+//        createTableUserWatchList();
 
 
 
@@ -56,12 +57,5 @@ public class Main {
 
         HttpServer httpServer = HttpHandler.makeConnectionPoint("localhost", 8080);
         HttpHandler.createContext(httpServer);
-
-//        SearchProfileRequest searchProfileRequest = new SearchProfileRequest();
-//        searchProfileRequest.setFirstName("Parsa");
-//        List<MiniProfile> miniProfileList = DatabaseQueryController.getWatchProfileSearchResults(searchProfileRequest).getMiniProfiles();
-//        for (MiniProfile profile : miniProfileList) {
-//            System.out.println(profile);
-//        }
     }
 }
