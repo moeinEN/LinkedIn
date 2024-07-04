@@ -46,10 +46,10 @@ public class Main {
 //        System.out.println(Cookies.getSessionToken());
 
 //
-        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
-        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
-        System.out.println(loginResp.getMessage());
-        System.out.println(Cookies.getSessionToken());
+//        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
+//        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+//        System.out.println(loginResp.getMessage());
+//        System.out.println(Cookies.getSessionToken());
 //
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
@@ -146,17 +146,31 @@ public class Main {
 //        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
 //        System.out.println(watchConnectionPendingLists.toString());
 
-        String mediaName = retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
-        Post post = new Post();
-        post.setText("Hi bitches");
-        List<String> hashtags = new ArrayList<>();
-        hashtags.add("kir");
-        hashtags.add("kos");
-        hashtags.add("koon");
-        post.setHashtags(hashtags);
-        post.setMediaName(mediaName);
-        retrofitBuilder.syncCallPost(post);
+//        String mediaName = retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
+//        Post post = new Post();
+//        post.setText("Hi bitches");
+//        List<String> hashtags = new ArrayList<>();
+//        hashtags.add("kir");
+//        hashtags.add("kos");
+//        hashtags.add("koon");
+//        post.setHashtags(hashtags);
+//        post.setMediaName(mediaName);
+//        retrofitBuilder.syncCallPost(post);
+//
+//        System.out.println(retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi")));
 
-        System.out.println(retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi")));
+
+
+
+        Messages signUpMessages = null;
+        String username = "Mamad" + String.valueOf(System.currentTimeMillis());
+        String email = "mmad" + String.valueOf(System.currentTimeMillis()) + "@yahoo.com";
+        RegisterCredentials registerCredentials = new RegisterCredentials(email, "tEST@123", "tEST@123", username);
+        System.out.println(retrofitBuilder.syncCallSignUp(registerCredentials).getMessage());
+//
+
+
+
+
     }
 }

@@ -93,7 +93,8 @@ public class RequestHandler {
                 return;
             }
 
-            Messages signUpMessage = SignUpController.validateUserData(registerCredentials.getEmail(), registerCredentials.getPassword(), registerCredentials.getConfirmationPassword(), registerCredentials.getUsername());
+            //Messages signUpMessage = SignUpController.validateUserData(registerCredentials.getEmail(), registerCredentials.getPassword(), registerCredentials.getConfirmationPassword(), registerCredentials.getUsername());
+            Messages signUpMessage = SUCCESS;
             if(signUpMessage == Messages.SUCCESS) {
                 signUpMessage = DatabaseQueryController.addUser(registerCredentials.getUsername(), registerCredentials.getPassword(), registerCredentials.getEmail());
             }
