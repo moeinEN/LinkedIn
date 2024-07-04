@@ -398,7 +398,7 @@ public class RequestHandler {
         }
     }
     public static void downloadHandler(HttpExchange exchange) throws IOException, SQLException {
-        if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+        if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             // Extract file name from the request URI
             String requestedFile = exchange.getRequestURI().getPath().replace("/files/", "");
             Path filePath = Paths.get("src/main/resources/testUpload", requestedFile);

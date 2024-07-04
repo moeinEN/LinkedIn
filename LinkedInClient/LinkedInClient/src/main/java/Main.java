@@ -4,6 +4,7 @@ import Model.*;
 import Model.Requests.*;
 import Model.Response.WatchConnectionListResponse;
 import Model.Response.WatchConnectionPendingLists;
+import Model.Response.WatchPostSearchResults;
 import Model.Response.WatchProfileSearchResults;
 
 import java.text.ParseException;
@@ -46,10 +47,10 @@ public class Main {
 //        System.out.println(Cookies.getSessionToken());
 
 //
-//        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
-//        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
-//        System.out.println(loginResp.getMessage());
-//        System.out.println(Cookies.getSessionToken());
+        LoginCredentials loginCredentials = new LoginCredentials("testProject", "teteEST@123");
+        Messages loginResp = retrofitBuilder.syncCallLogin(loginCredentials);
+        System.out.println(loginResp.getMessage());
+        System.out.println(Cookies.getSessionToken());
 //
 //        ProfileExperience profileExperience;//###################################
 //        List<ProfileJob> jobs = new ArrayList<>();
@@ -156,21 +157,9 @@ public class Main {
 //        post.setHashtags(hashtags);
 //        post.setMediaName(mediaName);
 //        retrofitBuilder.syncCallPost(post);
-//
-//        System.out.println(retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi")));
 
-
-
-
-        Messages signUpMessages = null;
-        String username = "Mamad" + String.valueOf(System.currentTimeMillis());
-        String email = "mmad" + String.valueOf(System.currentTimeMillis()) + "@yahoo.com";
-        RegisterCredentials registerCredentials = new RegisterCredentials(email, "tEST@123", "tEST@123", username);
-        System.out.println(retrofitBuilder.syncCallSignUp(registerCredentials).getMessage());
-//
-
-
-
-
+        WatchPostSearchResults watchPostSearchResults = retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi"));
+        System.out.println(watchPostSearchResults.toString());
+        retrofitBuilder.asyncCallDownload(watchPostSearchResults.getPosts().get(0).getMediaName());
     }
 }
