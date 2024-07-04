@@ -4,6 +4,7 @@ import Model.*;
 import Model.Requests.*;
 import Model.Response.WatchConnectionListResponse;
 import Model.Response.WatchConnectionPendingLists;
+import Model.Response.WatchPostSearchResults;
 import Model.Response.WatchProfileSearchResults;
 
 import java.text.ParseException;
@@ -146,17 +147,19 @@ public class Main {
 //        WatchConnectionPendingLists watchConnectionPendingLists = retrofitBuilder.watchConnectionPendingLists();
 //        System.out.println(watchConnectionPendingLists.toString());
 
-        String mediaName = retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
-        Post post = new Post();
-        post.setText("Hi bitches");
-        List<String> hashtags = new ArrayList<>();
-        hashtags.add("kir");
-        hashtags.add("kos");
-        hashtags.add("koon");
-        post.setHashtags(hashtags);
-        post.setMediaName(mediaName);
-        retrofitBuilder.syncCallPost(post);
+//        String mediaName = retrofitBuilder.asyncCallUpload("src/main/resources/test2.mp4");
+//        Post post = new Post();
+//        post.setText("Hi bitches");
+//        List<String> hashtags = new ArrayList<>();
+//        hashtags.add("kir");
+//        hashtags.add("kos");
+//        hashtags.add("koon");
+//        post.setHashtags(hashtags);
+//        post.setMediaName(mediaName);
+//        retrofitBuilder.syncCallPost(post);
 
-        System.out.println(retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi")));
+        WatchPostSearchResults watchPostSearchResults = retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi"));
+        System.out.println(watchPostSearchResults.toString());
+        retrofitBuilder.asyncCallDownload(watchPostSearchResults.getPosts().get(0).getMediaName());
     }
 }
