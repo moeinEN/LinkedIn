@@ -310,7 +310,9 @@ public class DatabaseQueryController {
                     throw new SQLException("Creating post failed, no ID obtained.");
                 }
             }
-
+            ProfileHeader profileHeaderSender = getProfileHeader(conn, getProfileIdFromUserId(conn, userId));
+            String msg = "Your Connection " + profileHeaderSender.getFirstName() + " " + profileHeaderSender.getLastName() + " has posted something";
+            insertPostNotification(conn, userId, msg);
             conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
@@ -455,7 +457,7 @@ public class DatabaseQueryController {
         }
         return new WatchPostSearchResults();
     }
-    //CONNECTION
+    //CONNECTION/FOLLOW
     public static void createTableConnect() throws SQLException {
         String sql = "CREATE TABLE Connect (\n" +
                 "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
@@ -538,22 +540,6 @@ public class DatabaseQueryController {
             conn.setAutoCommit(true);
         }
     }
-    public static void insertConnect(int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO Connect (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
-        Connection conn = DbController.getConnection();
-        conn.setAutoCommit(false);
-        PreparedStatement pstmt = conn.prepareStatement(sql);
-        try {
-            pstmt.setInt(1, senderId);
-            pstmt.setInt(2, receiverId);
-            pstmt.executeUpdate();
-            conn.commit();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
     public static WatchConnectionPendingLists selectPendingConnectionList(int receiverId) throws SQLException {
         String sql = "SELECT * FROM Pending WHERE specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();
@@ -621,7 +607,6 @@ public class DatabaseQueryController {
             conn.setAutoCommit(true);
         }
     }
-
     public static void acceptOrDeclineConnection(int receiverId, AcceptConnection acceptConnection) throws SQLException {
         String sql = "DELETE FROM Pending WHERE specifiedSenderId = ? AND specifiedReceiverId = ?";
         Connection conn = DbController.getConnection();
@@ -647,12 +632,34 @@ public class DatabaseQueryController {
             pstmt.setInt(1, senderId);
             pstmt.setInt(2, receiverId);
             pstmt.executeUpdate();
+            ProfileHeader profileHeaderSender = getProfileHeader(conn, getProfileIdFromUserId(conn, senderId));
+            ProfileHeader profileHeaderReceiver = getProfileHeader(conn, getProfileIdFromUserId(conn, receiverId));
+            String msg = profileHeaderSender.getFirstName() + " " + profileHeaderSender.getLastName() +
+                    " is now connected with" + " " + profileHeaderReceiver.getFirstName() + " " + profileHeaderReceiver.getLastName();
+            insertConnectorFollowNotification(conn, senderId, receiverId, msg);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
     }
-
+    public static void addFollowToUser(int senderId, FollowRequest followRequest) throws SQLException {
+        String sql = "INSERT INTO Follow (specifiedSenderId, specifiedReceiverId) VALUES (?, ?)";
+        Connection conn = DbController.getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int receiverId = followRequest.getIdentificationCode();
+            pstmt.setInt(1, senderId);
+            pstmt.setInt(2, receiverId);
+            pstmt.executeUpdate();
+            ProfileHeader profileHeaderSender = getProfileHeader(conn, getProfileIdFromUserId(conn, senderId));
+            ProfileHeader profileHeaderReceiver = getProfileHeader(conn, getProfileIdFromUserId(conn, receiverId));
+            String msg = profileHeaderSender.getFirstName() + " " + profileHeaderSender.getLastName() +
+                    " is now following " + " " + profileHeaderReceiver.getFirstName() + " " + profileHeaderReceiver.getLastName();
+            insertConnectorFollowNotification(conn, senderId, receiverId, msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     //CREATE PROFILE TABLES
     public static void createTableProfileSports() throws SQLException {
@@ -995,20 +1002,6 @@ public class DatabaseQueryController {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        }
-    }
-    public static void insertConnection(int senderProfileId, int receiverProfileId, String connectionStatus, String requestSentDate) throws SQLException {
-        String sql = "INSERT INTO Connections (senderSpecifiedProfileId, receiverSpecifiedProfileId, connectionStatus, requestSentDate) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DbController.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            conn.setAutoCommit(true);
-            pstmt.setInt(1, senderProfileId);
-            pstmt.setInt(2, receiverProfileId);
-            pstmt.setString(3, connectionStatus);
-            pstmt.setString(4, requestSentDate);
-            pstmt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
     public static void insertProfileExperience(Connection conn, ProfileExperience experience, int profileId) throws SQLException {
@@ -1413,7 +1406,6 @@ public class DatabaseQueryController {
         }
         return null;
     }
-
     public static int getUserIdFromProfileId(Connection conn, int profileId) throws SQLException {
         String sql = "SELECT * FROM Profile WHERE id = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -1429,7 +1421,6 @@ public class DatabaseQueryController {
         }
         return 0;
     }
-
     public static int getProfileIdFromUserId(Connection conn, int userId) throws SQLException {
         String sql = "SELECT * FROM Profile WHERE userId = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -1445,7 +1436,6 @@ public class DatabaseQueryController {
         }
         return 0;
     }
-
     public static Feed getFeed(int userId) throws SQLException {
         String sql = "SELECT * FROM POST WHERE userId = ?";
         Connection conn = DbController.getConnection();
@@ -1478,5 +1468,106 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+
+
+
+
+    //NOTIFICATION
+    public static void createTableNotification() throws SQLException {
+        String sql = "CREATE TABLE NOTIFICATION (\n" +
+                "    id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                "    specifiedUserId INTEGER,\n" +
+                "    notification TEXT,\n" +
+                "    FOREIGN KEY (specifiedUserId) REFERENCES USER(id),\n" +
+                ");";
+        createTable(sql);
+    }
+    public static void insertPostNotification(Connection conn, int userId, String notification) throws SQLException {
+        Set<Integer> connectionIDs = new HashSet<>();
+        getAllConnectionAndFollowersId(userId, connectionIDs);
+        try {
+            for (Integer connectionID : connectionIDs) {
+                insertSingleNotification(conn, connectionID, notification);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void insertConnectorFollowNotification(Connection conn, int userIdSender, int userIdReceiver, String notification) throws SQLException {
+        Set<Integer> connectionIDs = new HashSet<>();
+        getAllConnectionAndFollowersId(userIdSender, connectionIDs);
+        getAllConnectionAndFollowersId(userIdReceiver, connectionIDs);
+        try {
+            for (Integer connectionID : connectionIDs) {
+                insertSingleNotification(conn, connectionID, notification);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void insertSingleNotification(Connection conn, int userId, String notification) throws SQLException {
+        String sql = "INSERT INTO Notification (specifiedUserId, notification) VALUES (?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.setString(2, notification);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void getAllConnectionAndFollowersId(int userId, Set<Integer> set) throws SQLException {
+        String sql1 = "SELECT * FROM Connect WHERE specifiedSenderId = ?";
+        String sql2 = "SELECT * FROM Connect WHERE specifiedReceiverId = ?";
+        String sql3 = "SELECT * FROM Follow WHERE specifiedfollowerId = ?";
+        String sql4 = "SELECT * FROM Follow WHERE specifiedfollowingId = ?";
+        Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql1)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                set.add(rs.getInt("specifiedReceiverId"));
+            }
+        }  catch (Exception e1) {
+            e1.printStackTrace();
+            throw e1;
+        }
+        try (PreparedStatement pstmt = conn.prepareStatement(sql2)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                set.add(rs.getInt("specifiedSenderId"));
+            }
+        }  catch (Exception e2) {
+            e2.printStackTrace();
+            throw e2;
+        }
+        try (PreparedStatement pstmt = conn.prepareStatement(sql3)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                set.add(rs.getInt("specifiedfollowingId"));
+            }
+        }  catch (Exception e3) {
+            e3.printStackTrace();
+            throw e3;
+        }
+        try (PreparedStatement pstmt = conn.prepareStatement(sql4)) {
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                set.add(rs.getInt("specifiedfollowerId"));
+            }
+        }  catch (Exception e4) {
+            e4.printStackTrace();
+            throw e4;
+        }
+    }
+
+
+
+
 
 }
