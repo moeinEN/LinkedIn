@@ -72,4 +72,10 @@ public interface UserService {
 
     @POST("/post")
     Call<ResponseBody> post(@Body Post post, @Header("sessionToken") String sessionToken);
+
+    @GET("/validateToken")
+    Call<ResponseBody> validateToken(@Header("sessionToken") String sessionToken);
+
+    @GET("/getWatchList")
+    Call<ResponseBody> getWatchList(@Header("sessionToken") String sessionToken);
 }

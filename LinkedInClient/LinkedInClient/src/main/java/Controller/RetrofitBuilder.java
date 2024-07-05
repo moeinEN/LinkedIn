@@ -121,6 +121,26 @@ public class RetrofitBuilder {
         return Messages.USER_LOGGED_IN_SUCCESSFULLY;
     }
 
+    public Messages validateToken() {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callValidate = service.validateToken(Cookies.getSessionToken());
+        Messages serverResponse;
+        try {
+            Response<ResponseBody> response = callValidate.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodyBytes = response.body().bytes();
+                Gson gson = new Gson();
+                serverResponse = gson.fromJson(new String(responseBodyBytes), Messages.class);
+                return serverResponse;
+            } else {
+                return Messages.INTERNAL_ERROR;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Messages.INTERNAL_ERROR;
+        }
+    }
+
     public Messages syncCallProfile(CreateProfileRequest profile) {
         UserService service = retrofit.create(UserService.class);
         Call<ResponseBody> callProfile = service.profile(profile, Cookies.getSessionToken());
@@ -375,6 +395,27 @@ public class RetrofitBuilder {
                 ServerResponse = gson.fromJson(new String(responseBodeBytes), WatchConnectionPendingLists.class);
 
                 return ServerResponse;
+            } else {
+                return null;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public WatchPostResponse getWatchList() {
+        UserService service = retrofit.create(UserService.class);
+        Call<ResponseBody> callGetWatchList = service.getWatchList(Cookies.getSessionToken());
+        WatchPostResponse watchPostResponse;
+        try {
+            Response<ResponseBody> response = callGetWatchList.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] responseBodeBytes = response.body().bytes();
+                Gson gson = new Gson();
+                watchPostResponse = gson.fromJson(new String(responseBodeBytes), WatchPostResponse.class);
+
+                return watchPostResponse;
             } else {
                 return null;
             }

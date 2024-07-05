@@ -53,9 +53,6 @@ public class Main {
         createTableNotification();
 
 
-
-
-
         HttpServer httpServer = HttpHandler.makeConnectionPoint("localhost", 8080);
         HttpHandler.createContext(httpServer);
     }

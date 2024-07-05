@@ -227,6 +227,30 @@ public class DatabaseQueryController {
                 ");";
         createTable(sql);
     }
+    public static Post getPostbyId(Connection conn ,int postId) throws SQLException {
+        String sql = "SELECT * FROM Post WHERE id = ?";
+        Post post = new Post();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, postId);
+            ResultSet rs = pstmt.executeQuery();
+            post.setText(rs.getString("caption"));
+            String hashtag = rs.getString("hashtag");
+            String[] hashtags = hashtag.split(",");
+            List<String> hashtagList = new ArrayList<>();
+            for (String str : hashtags) {
+                hashtagList.add(str);
+            }
+            post.setHashtags(hashtagList);
+            post.setMediaName("mediaName");
+            post.setLikes(getLikes(conn, postId));
+            post.setComments(getComments(conn, postId));
+            post.setIdentification(postId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return post;
+    }
     public static void addToWatchList(int userId, int postId) throws SQLException {
         String sql = "INSERT INTO UserWatchList (specifiedUserId, specifiedPostId) VALUES (?, ?)";
         try (Connection conn = DbController.getConnection();
@@ -239,20 +263,35 @@ public class DatabaseQueryController {
         }
     }
     //TODO recheck getWatchList Method
-    public static List<Integer> getWatchList(int userId) throws SQLException {
-        String sql = "SELECT specifiedPostId FROM UserWatchList WHERE specifiedUserId = ?";
-        List<Integer> watchList = new ArrayList<>();
+    public static WatchPostResponse getWatchList(int userId) throws SQLException {
+        String sql = "SELECT specifiedPostId FROM UserWatchList WHERE specifiedUserId = ? LIMIT = 5";
+        WatchPostResponse watchPostResponse = new WatchPostResponse();
+        List<Post> watchList = new ArrayList<>();
         try (Connection conn = DbController.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                watchList.add(rs.getInt("specifiedPostId"));
+                int postId = rs.getInt("specifiedPostId");
+                watchList.add(getPostbyId(conn, postId));
+                removeFromWatchList(conn, postId);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return watchList;
+        watchPostResponse.setPosts(watchList);
+        return watchPostResponse;
+    }
+    public static void removeFromWatchList(Connection conn, int postId) throws SQLException {
+        String sql = "DELETE FROM UserWatchList WHERE specifiedPostId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, postId);
+            pstmt.executeUpdate();
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     public static void createTablePost() throws SQLException {
         String sql = "CREATE TABLE POST (\n" +

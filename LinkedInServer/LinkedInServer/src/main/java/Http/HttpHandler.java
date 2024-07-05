@@ -219,6 +219,29 @@ public class HttpHandler {
             }
         });
 
+        server.createContext("/validateToken", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.validateToken(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        server.createContext("/getWatchList", new com.sun.net.httpserver.HttpHandler() {
+            public void handle(HttpExchange exchange) throws IOException {
+                try {
+                    RequestHandler.getWatchList(exchange);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+
         // Start the server
         server.setExecutor(null); // creates a default executor
         server.start();
