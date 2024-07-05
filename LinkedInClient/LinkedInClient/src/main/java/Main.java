@@ -157,9 +157,9 @@ public class Main {
 //        post.setHashtags(hashtags);
 //        post.setMediaName(mediaName);
 //        retrofitBuilder.syncCallPost(post);
-
-        WatchPostSearchResults watchPostSearchResults = retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi"));
-        System.out.println(watchPostSearchResults.toString());
-        retrofitBuilder.asyncCallDownload(watchPostSearchResults.getPosts().get(0).getMediaName());
+//
+//        WatchPostSearchResults watchPostSearchResults = retrofitBuilder.searchPostRequest(new SearchPostsRequest("Hi"));
+//        System.out.println(watchPostSearchResults.toString());
+//        retrofitBuilder.asyncCallDownload(watchPostSearchResults.getPosts().get(0).getMediaName());
     }
 }
