@@ -857,9 +857,54 @@ public class DatabaseQueryController {
 
     //INSERT PROFILE
     public static void insertProfile(Profile profile, int userId) throws SQLException {
-        String sql = "INSERT INTO Profile (userId) VALUES (?)";
-
         Connection conn = DbController.getConnection();
+        conn.setAutoCommit(false);
+        int id = getProfileIdByUserId(conn, userId);
+        try {
+            if (id != -1){
+                removeProfile(conn, userId, id);
+                insertProfileIfExists(conn, profile, userId, id);
+            } else {
+                insertProfileIfNotExists(conn, profile, userId);
+            }
+            conn.commit();
+        } catch (Exception e){
+            e.printStackTrace();
+            conn.rollback();
+        } finally {
+            conn.close();
+        }
+    }
+    public static void insertProfileIfExists(Connection conn, Profile profile, int userId, int profileId) throws SQLException {
+        String sql = "INSERT INTO Profile (id, userId) VALUES (?,?)";
+        if (Objects.isNull(conn)){
+            throw new SQLException("Couldn't get connection");
+        }
+        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            conn.setAutoCommit(false);
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
+
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                ProfileExperience experience = profile.getProfileExperience();
+                insertProfileExperience(conn, experience, profileId);
+                for (ProfileEducation education : profile.getProfileEducationList()) {
+                    insertProfileEducation(conn, education, profileId);
+                }
+                for (Certificate certificate : profile.getCertificatesList()) {
+                    insertCertificate(conn, certificate, profileId);
+                }
+                insertProfileHeader(conn, profile.getHeader(), profileId);
+                insertProfileSkill(conn, profile.getSkills(), profileId);
+                insertOrganizationCooperate(conn, profile.getOrganizations(), profileId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void insertProfileIfNotExists(Connection conn, Profile profile, int userId) throws SQLException {
+        String sql = "INSERT INTO Profile (userId) VALUES (?)";
         if (Objects.isNull(conn)){
             throw new SQLException("Couldn't get connection");
         }
@@ -887,15 +932,43 @@ public class DatabaseQueryController {
                     insertProfileSkill(conn, profile.getSkills(), profileId);
                     insertOrganizationCooperate(conn, profile.getOrganizations(), profileId);
                 }
-                conn.commit();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            conn.rollback();
             throw e;
         }
-        finally {
-            conn.close();
+    }
+    public static void removeProfile(Connection conn, int userId, int profileId) throws SQLException {
+        removeProfileHeader(conn, profileId);
+        removeProfileJob(conn, profileId);
+        removeProfileEducation(conn, profileId);
+        removeCertificate(conn, profileId);
+        removeProfileExperience(conn, profileId);
+        removeProfileSkill(conn, profileId);
+        removeOrganizationCooperate(conn, profileId);
+        String sql = "DELETE FROM Profile where userId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static int getProfileIdByUserId(Connection conn, int userId) throws SQLException {
+        String sql = "SELECT id FROM Profile where userId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, userId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+            return -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
     public static void insertProfileHeader(Connection conn, ProfileHeader header, int profileId) throws SQLException {
@@ -928,6 +1001,34 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeProfileHeader(Connection conn, int specifiedProfileId) throws SQLException {
+        int id = getProfileHeaderIdByProfileId(conn, specifiedProfileId);
+        removeProfileContactInfo(conn, id);
+        String sql = "DELETE FROM ProfileHeader where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static int getProfileHeaderIdByProfileId(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "SELECT id FROM ProfileHeader where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+            return -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static void insertProfileJob(Connection conn, ProfileJob job, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileJob (specifiedProfileId, title, jobStatus, companyName, workplaceLocation, jobWorkplaceStatus, companyActivityStatus, startDate, endDate, currentlyWorking, description, jobSkills, informOthersForTheProfileUpdate, isCurrentJob) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         StringJoiner joiner = new StringJoiner(",");
@@ -950,6 +1051,17 @@ public class DatabaseQueryController {
             pstmt.setString(12, joiner.toString());
             pstmt.setBoolean(13, job.getInformOthersForTheProfileUpdate());
             pstmt.setBoolean(14, job.getIsCurrentProfileJob());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void removeProfileJob(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "DELETE FROM ProfileJob where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -991,6 +1103,17 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeProfileEducation(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "DELETE FROM ProfileEducation where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static void insertCertificate(Connection conn, Certificate certificate, int profileId) throws SQLException {
         String sql = "INSERT INTO Certificate (specifiedProfileId, name, organizationName, issueDate, expiryDate, certificateId, certificateURL, relatedSkills) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         StringJoiner joiner = new StringJoiner(",");
@@ -1020,6 +1143,17 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeCertificate(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "DELETE FROM Certificate where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static int insertProfileContactInfo(Connection conn, ProfileContactInfo contactInfo, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileContactInfo (specifiedProfileHeaderId, linkUrl, emailAddress, phoneNumber, phoneType, address, dateOfBirth, showBirthDateTo, otherContactInfo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -1043,6 +1177,17 @@ public class DatabaseQueryController {
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+    public static void removeProfileContactInfo(Connection conn, int specifiedProfileHeaderId) throws SQLException {
+        String sql = "DELETE FROM ProfileContactInfo where specifiedProfileHeaderId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileHeaderId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
     }
     public static void insertProfileExperience(Connection conn, ProfileExperience experience, int profileId) throws SQLException {
@@ -1075,6 +1220,35 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeProfileExperience(Connection conn, int specifiedProfileId) throws SQLException {
+        int id = getProfileExperienceIdByProfileId(conn, specifiedProfileId);
+        removeProfileSports(conn, id);
+        removeProfileVoluntaryActivity(conn, id);
+        String sql = "DELETE FROM ProfileExperience where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static int getProfileExperienceIdByProfileId(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "SELECT id FROM ProfileExperience where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+            return -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static void insertProfileSkill(Connection conn, ProfileSkills skill, int profileId) throws SQLException {
         String sql = "INSERT INTO ProfileSkills (specifiedProfileId, jobSkills, educationalSkills) VALUES (?, ?, ?)";
         StringJoiner joiner = new StringJoiner(",");
@@ -1090,6 +1264,17 @@ public class DatabaseQueryController {
             pstmt.setInt(1, profileId);
             pstmt.setString(2, joiner.toString());
             pstmt.setString(3, joiner1.toString());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void removeProfileSkill(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "DELETE FROM ProfileSkills where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1112,6 +1297,17 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeOrganizationCooperate(Connection conn, int specifiedProfileId) throws SQLException {
+        String sql = "DELETE FROM ProfileOrganizations where specifiedProfileId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static void insertProfileVoluntaryActivity(Connection conn, ProfileVoluntaryActivities activity, int experienceId) throws SQLException {
         String sql = "INSERT INTO ProfileVoluntaryActivities (specifiedProfileExperienceId, desc, date) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -1125,6 +1321,17 @@ public class DatabaseQueryController {
             throw e;
         }
     }
+    public static void removeProfileVoluntaryActivity(Connection conn, int specifiedProfileExperienceId) throws SQLException {
+        String sql = "DELETE FROM ProfileVoluntaryActivities where specifiedProfileExperienceId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileExperienceId);
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
     public static void insertProfileSports(Connection conn, ProfileSports sports, int experienceId) throws SQLException {
         String sql = "INSERT INTO ProfileSports (specifiedProfileExperienceId, desc, date) VALUES (?, ?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -1132,6 +1339,17 @@ public class DatabaseQueryController {
             pstmt.setInt(1, experienceId);
             pstmt.setString(2, sports.getDesc());
             pstmt.setString(3, sports.getDate().toString());
+            pstmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void removeProfileSports(Connection conn, int specifiedProfileExperienceId) throws SQLException {
+        String sql = "DELETE FROM ProfileSports where specifiedProfileExperienceId = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            //conn.setAutoCommit(true);
+            pstmt.setInt(1, specifiedProfileExperienceId);
             pstmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
