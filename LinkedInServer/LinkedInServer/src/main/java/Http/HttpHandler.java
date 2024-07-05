@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
 
 public class HttpHandler {
 
@@ -243,7 +244,7 @@ public class HttpHandler {
 
 
         // Start the server
-        server.setExecutor(null); // creates a default executor
+        server.setExecutor(Executors.newFixedThreadPool(10)); // creates a default executor
         server.start();
         System.out.println("Server started on port 8080");
     }

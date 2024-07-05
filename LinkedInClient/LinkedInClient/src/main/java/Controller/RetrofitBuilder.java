@@ -15,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -27,6 +28,7 @@ public class RetrofitBuilder {
 
     private Retrofit retrofitBuilder() {
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.readTimeout(5, TimeUnit.MINUTES);
 
         Gson gson = new GsonBuilder()
                 .create();

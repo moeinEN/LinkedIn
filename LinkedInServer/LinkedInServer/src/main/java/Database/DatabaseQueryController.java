@@ -115,7 +115,9 @@ public class DatabaseQueryController {
             db.close();
         }
     }
-    public static Messages addUser(String username, String password, String email) {
+
+    //TODO Sync EveryThing
+    public synchronized static Messages addUser(String username, String password, String email) {
         try {
             Connection db = null;
             Statement stmt = null;
